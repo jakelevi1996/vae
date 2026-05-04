@@ -17,3 +17,4 @@ __pycache__
 *.synctex(busy)
 *.cut
 *.brf
+*.toc
