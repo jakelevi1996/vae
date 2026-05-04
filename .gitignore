@@ -4,3 +4,16 @@
 
 __pycache__
 *.egg-info
+
+*.pdf
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.gz
+*.bbl
+*.blg
+*.out
+*.synctex(busy)
+*.cut
+*.brf

@@ -1,0 +1,60 @@
+\documentclass{article}
+
+\usepackage[backref=page]{hyperref}
+\usepackage{setspace}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{subcaption}
+\usepackage{multirow}
+\usepackage{parskip}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{breakcites}
+
+\geometry{a4paper, margin=1in}
+\graphicspath{{../..}}
+\hbadness 10000
+\vbadness 10000
+\hfuzz 100pt
+\vfuzz 100pt
+\righthyphenmin 100
+
+\begin{document}
+
+\begin{center}
+    \doublespacing
+    \textbf{\LARGE Variational Autoencoder \\ Presentation Notes} \\
+    Jake Levi $\cdot$ \today
+\end{center}
+
+\section{Historical context and impact in 2010s deep learning}
+
+\begin{itemize}
+    \item VAE paper \cite{kingma2013auto} first appeared on Arxiv on Fri, 20 Dec 2013 (currently 55k citations)
+    \item A paper proposing similar ideas, but much less cited (7k vs 55k) appears on 16 Jan 2014 \cite{rezende2014stochastic}
+    \item This comes \emph{after}:
+    \begin{itemize}
+        \item ``Xavier''/``Glorot'' initialisation, 2010 \cite{glorot2010understanding} (30k)
+        \item AlexNet, 2012 \cite{krizhevsky2012imagenet} (155k)
+        \item Dropout, 2012 \cite{hinton2012improving} (13k)
+    \end{itemize}
+    \item This comes \emph{before}:
+    \begin{itemize}
+        \item VGGNet, 2014 \cite{simonyan2014very} (161k)
+        \item Adam, 2014 \cite{kingma2014adam} (243k)
+        \item Neural attention, 2014 \cite{bahdanau2014neural} (43k)
+        \item GANs, 2014 \cite{goodfellow2014generative} (94k)
+        \item BatchNorm, 2015 \cite{ioffe2015batch} (68k)
+        \item ResNet, 2015 \cite{he2016deep} (318k)
+        \item ``Kaiming''/``He'' initialisation, 2015 \cite{he2015delving} (30k)
+        \item Diffusion, 2015 \cite{sohl2015deep} (12k)
+        \item LayerNorm, 2016 \cite{ba2016layer} (19k)
+        \item Transformers, 2017 \cite{vaswani2017attention} (245k)
+    \end{itemize}
+\end{itemize}
+
+\bibliographystyle{apalike}
+\bibliography{../references}
+
+\end{document}
