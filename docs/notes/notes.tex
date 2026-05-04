@@ -152,6 +152,25 @@
 \end{itemize}
 
 \newpage
+\section{VI intro: EM algorithm (analysis)}
+
+\begin{itemize}
+    \item Compare original loss function, E step, and M step:
+    \begin{align}
+        \theta^* &= \underset{\theta}{\text{argmin}}\left[ -\sum_{n=1}^N \left[ \log\left( \sum_{z_n} \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \right) \right] \right] && \text{(Original loss)} \\
+        q_n &\leftarrow \underset{q_n}{\text{argmin}}\left[ \text{KL}_{z_n}\Bigl[ q_{nz_n} \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \right] && \text{(E step)} \\
+        \theta &\leftarrow \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \mathbb{E}_{z_n\sim q_{nz_n}}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] \right] \right] && \text{(M step)}
+    \end{align}
+    \item E step is tractable by assumption
+    \item M step is tractable because sum appears \emph{outside} log (unlike original loss function)
+    \item Each iteration (E step + M step) is \emph{guaranteed} to reduce loss function:
+    \begin{itemize}
+        \item E step sets $q$ so KL terms are zero, but loss function does not depend on $q$ $\Rightarrow$ no change
+        \item M step sets $\theta$ to increase expected log joint distribution \emph{and KL terms increase from zero} (because approximate posterior changes but $q$ remains fixed) $\Rightarrow$ ``double'' reduction in loss
+    \end{itemize}
+\end{itemize}
+
+\newpage
 \bibliographystyle{apalike}
 \bibliography{../references}
 
