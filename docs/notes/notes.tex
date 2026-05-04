@@ -81,6 +81,7 @@
     \begin{align}
         p\bigl(x_n, z_n \,\vert\, \theta\bigr) &= p\bigl( z_n \,\vert\, \theta \bigr)\;p\bigl( x_n \,\vert\, z_n, \theta \bigr) && \text{(Joint/generative model)}
     \end{align}
+    \item Sample latent variable, then sample data given latent variable
     \item Textbook example = GMM:
     \begin{align}
         p\bigl(x_n, z_n \,\vert\, \theta\bigr) &= \pi_{(z_n)}\;\mathcal{N}\left( x_n \;\middle\vert\; \mu_{(z_n)}, \sigma_{(z_n)}^2 \right) && \text{(GMM joint distribution)}
@@ -122,6 +123,32 @@
         &\qquad\qquad + \text{KL}_{z_n}\Bigl[ q_{nz_n} \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \nonumber \\
         &\qquad \Biggr] && \text{(Definitions)} \\
     \end{align}
+\end{itemize}
+
+\newpage
+\section{VI intro: EM algorithm (derivation 2)}
+
+\begin{itemize}
+    \item Recall loss function:
+    \begin{align}
+        \mathcal{L}(x, \theta) &= -\log\bigl( p\bigl(x \,\vert\, \theta\bigr) \bigr) \\
+        &= -\sum_{n=1}^N \Biggl[ \nonumber \\
+        &\qquad\qquad \mathbb{E}_{z_n\sim q_{nz_n}}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] + \mathcal{H}_{z_n} \Bigl[ q_{nz_n} \Bigr] \nonumber \\
+        &\qquad\qquad + \text{KL}_{z_n}\Bigl[ q_{nz_n} \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \nonumber \\
+        &\qquad \Biggr]
+    \end{align}
+    \item EM algorithm proceeds in 2 alternating steps:
+    \begin{enumerate}
+        \item E step:
+        \begin{align}
+            q_n &\leftarrow \underset{q_n}{\text{argmin}}\left[ \text{KL}_{z_n}\Bigl[ q_{nz_n} \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \right] \\
+            &= p\bigl(z_n \,\vert\, x_n, \theta\bigr)
+        \end{align}
+        \item M step:
+        \begin{equation}
+            \theta \leftarrow \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \mathbb{E}_{z_n\sim q_{nz_n}}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] \right] \right]
+        \end{equation}
+    \end{enumerate}
 \end{itemize}
 
 \newpage
