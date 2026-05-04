@@ -76,7 +76,7 @@
 
 \begin{itemize}
     \item VAE builds on VI
-    \item EM = good conceptual intro to VI
+    \item VI (conceptually) builds on EM
     \item Problem: suppose we have a probabilistic model with IID observed data $x_n$, latent variables $z_n$, and parameters $\theta$ for $n\in\{1,\dots,N\}$:
     \begin{align}
         p\bigl(x_n, z_n \,\vert\, \theta\bigr) &= p\bigl( z_n \,\vert\, \theta \bigr)\;p\bigl( x_n \,\vert\, z_n, \theta \bigr) && \text{(Joint/generative model)}
@@ -86,19 +86,18 @@
     \begin{align}
         p\bigl(x_n, z_n \,\vert\, \theta\bigr) &= \pi_{(z_n)}\;\mathcal{N}\left( x_n \;\middle\vert\; \mu_{(z_n)}, \sigma_{(z_n)}^2 \right) && \text{(GMM joint distribution)}
     \end{align}
-    \item Want to find parameters $\theta^*$ that maximise likelihood of observed data (minimise NLL):
+    \item Want to find parameters $\theta^*$ that maximise likelihood of observed data:
     \begin{align}
-        \theta^* &= \underset{\theta}{\text{argmin}}\Bigl[ \mathcal{L}(x, \theta) \Bigr] && \text{(Optimal parameters)} \\
-        \mathcal{L}(x, \theta) &= -\log\bigl( p\bigl(x \,\vert\, \theta\bigr) \bigr) && \text{(Loss function = NLL)} \\
-        &= -\sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] && \text{(Sum over data points)} \\
-        &= -\sum_{n=1}^N \left[ \log\left( \sum_{z_n} \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \right) \right] && \text{(Marginalise over latents)} \label{eq:EM loss function}
+        \theta^* &= \underset{\theta}{\text{argmax}}\left[ \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) \right] && \text{(Optimal parameters)} \\
+        \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] && \text{(Sum over data points)} \\
+        &= \sum_{n=1}^N \left[ \log\left( \sum_{z_n} \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \right) \right] && \text{(Marginalise over latents)} \label{eq:EM objective function}
     \end{align}
     \item Assume easy to:
     \begin{enumerate}
-        \item Find latent posterior $p\bigl( z_n \,\vert\, x_n, \theta \bigr)$
+        \item Find latent posterior $p\bigl( z_n \,\vert\, x_n, \theta \bigr)$ (EG cluster assignments in GMM)
         \item Find $\theta^*$ which maximises $p\bigl(x, z \,\vert\, \theta\bigr)$ when $z$ are known (don't need to marginalise)
     \end{enumerate}
-    \item BUT, in general, no closed-form solution to Equation \ref{eq:EM loss function} (because of sum inside log)
+    \item BUT, in general, no closed-form solution to Equation \ref{eq:EM objective function} (because of sum inside log)
 \end{itemize}
 
 \newpage
@@ -109,19 +108,19 @@
     \begin{align}
         q_{nz_n} &\approx p\bigl( z_n \,\vert\, x_n, \theta \bigr) && \text{(Approximate latent posterior)}
     \end{align}
-    \item Expand the loss function:
+    \item Expand the log likelihood:
     \begin{align}
-        \mathcal{L}(x, \theta) &= -\sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] && \text{(Loss function = NLL)} \\
-        &= -\sum_{n=1}^N \left[ \sum_{z_n} \left[ q_{nz_n}\log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \right] && \text{(Marginalise over latents)} \\
-        &= -\sum_{n=1}^N \left[ \sum_{z_n} \left[ q_{nz_n}\log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{p\bigl(z_n \,\vert\, x_n, \theta\bigr)} \right) \right] \right] && \text{(Product rule)} \\
-        &= -\sum_{n=1}^N \Biggl[ \sum_{z_n} \Biggl[ \nonumber \\
+        & \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \nonumber \\
+        &= \sum_{n=1}^N \left[ \sum_{z_n} \left[ q_{nz_n}\log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \right] && \text{(Marginalise over latents)} \\
+        &= \sum_{n=1}^N \left[ \sum_{z_n} \left[ q_{nz_n}\log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{p\bigl(z_n \,\vert\, x_n, \theta\bigr)} \right) \right] \right] && \text{(Product rule)} \\
+        &= \sum_{n=1}^N \Biggl[ \sum_{z_n} \Biggl[ \nonumber \\
         &\qquad\qquad q_{nz_n}\log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{q_{nz_n}} \right) \nonumber \\
         &\qquad\qquad +q_{nz_n}\log\left( \frac{q_{nz_n}}{p\bigl(z_n \,\vert\, x_n, \theta\bigr)} \right) \nonumber \\
-        &\qquad \Biggr] \Biggr] && \text{($\times q_{nz_n} / q_{nz_n}$ and separate)} \\
-        &= -\sum_{n=1}^N \Biggl[ \nonumber \\
+        &\qquad \Biggr] \Biggr] && \text{($\times q_{nz_n} / q_{nz_n}$ and separate)} \label{eq:NLL decomposition} \\
+        &= \sum_{n=1}^N \Biggl[ \nonumber \\
         &\qquad\qquad \mathbb{E}_{z_n\sim q_{nz_n}}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] + \mathcal{H}_{z_n} \Bigl[ q_{nz_n} \Bigr] \nonumber \\
         &\qquad\qquad + \text{KL}_{z_n}\Bigl[ q_{nz_n} \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \nonumber \\
-        &\qquad \Biggr] && \text{(Definitions)} \\
+        &\qquad \Biggr] && \text{(Apply definitions)}
     \end{align}
 \end{itemize}
 
@@ -129,10 +128,9 @@
 \section{VI intro: EM algorithm (derivation 2)}
 
 \begin{itemize}
-    \item Recall loss function:
+    \item Recall expression for log likelihood:
     \begin{align}
-        \mathcal{L}(x, \theta) &= -\log\bigl( p\bigl(x \,\vert\, \theta\bigr) \bigr) \\
-        &= -\sum_{n=1}^N \Biggl[ \nonumber \\
+        \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \Biggl[ \nonumber \\
         &\qquad\qquad \mathbb{E}_{z_n\sim q_{nz_n}}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] + \mathcal{H}_{z_n} \Bigl[ q_{nz_n} \Bigr] \nonumber \\
         &\qquad\qquad + \text{KL}_{z_n}\Bigl[ q_{nz_n} \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \nonumber \\
         &\qquad \Biggr]
@@ -145,9 +143,10 @@
             &= p\bigl(z_n \,\vert\, x_n, \theta\bigr)
         \end{align}
         \item M step:
-        \begin{equation}
-            \theta \leftarrow \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \mathbb{E}_{z_n\sim q_{nz_n}}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] \right] \right]
-        \end{equation}
+        \begin{align}
+            \theta &\leftarrow \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \mathbb{E}_{z_n\sim q_{nz_n}}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] \right] \right] \\
+            &= \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \sum_{z_n}\left[ q_{nz_n} \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] \right] \right]
+        \end{align}
     \end{enumerate}
 \end{itemize}
 
@@ -155,18 +154,18 @@
 \section{VI intro: EM algorithm (analysis)}
 
 \begin{itemize}
-    \item Compare original loss function, E step, and M step:
+    \item Compare original objective function, E step, and M step:
     \begin{align}
-        \theta^* &= \underset{\theta}{\text{argmin}}\left[ -\sum_{n=1}^N \left[ \log\left( \sum_{z_n} \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \right) \right] \right] && \text{(Original loss)} \\
+        \theta^* &= \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \log\left( \sum_{z_n} \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \right) \right] \right] && \text{(Original objective)} \\
         q_n &\leftarrow \underset{q_n}{\text{argmin}}\left[ \text{KL}_{z_n}\Bigl[ q_{nz_n} \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \right] && \text{(E step)} \\
-        \theta &\leftarrow \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \mathbb{E}_{z_n\sim q_{nz_n}}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] \right] \right] && \text{(M step)}
+        \theta &\leftarrow \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \sum_{z_n}\left[ q_{nz_n} \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] \right] \right] && \text{(M step)}
     \end{align}
     \item E step is tractable by assumption
-    \item M step is tractable because sum appears \emph{outside} log (unlike original loss function)
-    \item Each iteration (E step + M step) is \emph{guaranteed} to reduce loss function:
+    \item M step is tractable (EG for GMM) because sum appears \emph{outside} log (unlike original objective)
+    \item Each iteration (E step + M step) is \emph{guaranteed} to improve objective function:
     \begin{itemize}
-        \item E step sets $q$ so KL terms are zero, but loss function does not depend on $q$ $\Rightarrow$ no change
-        \item M step sets $\theta$ to increase expected log joint distribution \emph{and KL terms increase from zero} (because approximate posterior changes but $q$ remains fixed) $\Rightarrow$ ``double'' reduction in loss
+        \item E step sets $q$ so KL terms are zero, but objective function $\not\ni$ dependence on $q$ $\Rightarrow$ no change
+        \item M step sets $\theta$ to increase expected log joint distribution \emph{and KL terms increase from zero} (because approximate posterior changes but $q$ remains fixed) $\Rightarrow$ ``double'' improvement
     \end{itemize}
 \end{itemize}
 
