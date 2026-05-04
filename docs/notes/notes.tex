@@ -101,7 +101,7 @@
 \end{itemize}
 
 \newpage
-\section{VI intro: EM algorithm (derivation 1)}
+\section{VI intro: EM algorithm (derivation part 1)}
 
 \begin{itemize}
     \item Define $q$ distribution, which will be our approximation to the latent posterior $p\bigl( z \,\vert\, x, \theta \bigr)$:
@@ -125,7 +125,7 @@
 \end{itemize}
 
 \newpage
-\section{VI intro: EM algorithm (derivation 2)}
+\section{VI intro: EM algorithm (derivation part 2)}
 
 \begin{itemize}
     \item Recall expression for log likelihood:
@@ -160,13 +160,74 @@
         q_n &\leftarrow \underset{q_n}{\text{argmin}}\left[ \text{KL}_{z_n}\Bigl[ q_{nz_n} \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \right] && \text{(E step)} \\
         \theta &\leftarrow \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \sum_{z_n}\left[ q_{nz_n} \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] \right] \right] && \text{(M step)}
     \end{align}
-    \item E step is tractable by assumption
+    \item E step is tractable by assumption (EG for GMM)
     \item M step is tractable (EG for GMM) because sum appears \emph{outside} log (unlike original objective)
     \item Each iteration (E step + M step) is \emph{guaranteed} to improve objective function:
     \begin{itemize}
         \item E step sets $q$ so KL terms are zero, but objective function $\not\ni$ dependence on $q$ $\Rightarrow$ no change
-        \item M step sets $\theta$ to increase expected log joint distribution \emph{and KL terms increase from zero} (because approximate posterior changes but $q$ remains fixed) $\Rightarrow$ ``double'' improvement
+        \item M step sets $\theta$ to increase expected log joint distribution \emph{and KL terms increase from zero} (because latent posterior changes but $q$ remains fixed) $\Rightarrow$ ``double'' improvement
     \end{itemize}
+\end{itemize}
+
+\newpage
+\section{VAE problem setting}
+
+\begin{itemize}
+    \item EM is great when latent posterior is tractable\dots but we want more complex models $\Rightarrow$ VAE
+    \item Assume:
+    \begin{itemize}
+        \item Latent variables $z$ are continuous
+        \item Observed variables $x$ can be continuous or discrete
+        \item Data-generating process, given unknown $\theta^*$, for $n\in\{1,\dots,N\}$:
+        \begin{align}
+            p\bigl(x_n, z_n \,\vert\, \theta^*\bigr) &= p\bigl( z_n \,\vert\, \theta^* \bigr)\;p\bigl( x_n \,\vert\, z_n, \theta^* \bigr)
+        \end{align}
+    \end{itemize}
+    \item Define continuous $q$ distribution (approximate latent posterior), parameterised by $\phi$:
+    \begin{align}
+        q(z_n \,\vert\, x_n, \phi) &\approx p\bigl( z_n \,\vert\, x_n, \theta^* \bigr)
+    \end{align}
+    \item Refer to:
+    \begin{itemize}
+        \item $q(z_n \,\vert\, x_n, \phi)$ as the ``recognition model'' or ``encoder''
+        \item $p(x_n \,\vert\, z_n, \theta)$ as the ``generative model'' or ``decoder''
+    \end{itemize}
+    \item We want:
+    \begin{itemize}
+        \item To define $q(z_n \,\vert\, x_n, \phi)$ and $p(x_n \,\vert\, z_n, \theta)$ as neural networks
+        \item To learn $\theta$ and $\phi$ using backpropagation and SGD with mini-batches
+        \item To maximise the likelihood of a large dataset $x$
+    \end{itemize}
+\end{itemize}
+
+\newpage
+\section{Defining the ELBO}
+
+\begin{itemize}
+    \item Derive ELBO (``Evidence Lower BOund'') from earlier decomposition of log likelihood:
+    \begin{align}
+        \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \Biggl[ \nonumber \\
+        &\qquad\qquad \mathbb{E}_{z_n\sim q} \left[ \log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{q(z_n \,\vert\, x_n, \phi)} \right) \right] \nonumber \\
+        &\qquad\qquad + \text{KL}\Bigl[ q(z_n \,\vert\, x_n, \phi) \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \nonumber \\
+        &\qquad \Biggr] && \text{(From (\ref{eq:NLL decomposition}))}\\
+        &\ge \sum_{n=1}^N \left[ \mathbb{E}_{z_n\sim q} \left[ \log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{q(z_n \,\vert\, x_n, \phi)} \right) \right] \right] && \text{(KL $\ge 0$)} \\
+        &= \sum_{n=1}^N \Bigl[ \mathcal{L}\bigl( x_n, \theta, \phi \bigr) \Bigr] \\
+        \text{where} \quad \mathcal{L}\bigl( x_n, \theta, \phi \bigr) &= \mathbb{E}_{z_n\sim q} \left[ \log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{q(z_n \,\vert\, x_n, \phi)} \right) \right] \label{eq:define ELBO}
+    \end{align}
+    \item NB $\mathcal{L}$ is shorthand for ``ELBO'', not ``Loss'' (we want to \emph{maximise} $\mathcal{L}$)
+\end{itemize}
+
+\newpage
+\section{Simplifying the ELBO}
+
+\begin{itemize}
+    \item We can simplify $\mathcal{L}$ further:
+    \begin{align}
+        \mathcal{L}\bigl( x_n, \theta, \phi \bigr) &= \mathbb{E}_{z_n\sim q} \left[ \log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{q(z_n \,\vert\, x_n, \phi)} \right) \right] && \text{(From (\ref{eq:define ELBO}))}\\
+        &= \mathbb{E}_{z_n\sim q} \left[ \log\left( \frac{p\bigl(z_n \,\vert\, \theta\bigr)}{q(z_n \,\vert\, x_n, \phi)} \right) + \log \Bigl( p\bigl(x_n \,\vert\, z_n, \theta\bigr) \Bigr) \right] && \text{(Product rule)} \\
+        &= \text{KL}\Bigl[ q(z_n \,\vert\, x_n, \phi) \Bigm\Vert p\bigl(z_n \,\vert\, \theta\bigr) \Bigr] + \mathbb{E}_{z_n\sim q} \left[ \log \Bigl( p\bigl(x_n \,\vert\, z_n, \theta\bigr) \Bigr) \right] && \text{(KL definition)}
+    \end{align}
+    \item \$1mQ: how to evaluate/estimate these terms when $q(z_n \,\vert\, x_n, \phi), p\bigl(x_n \,\vert\, z_n, \theta\bigr)$ are neural networks?
 \end{itemize}
 
 \newpage
