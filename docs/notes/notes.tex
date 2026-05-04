@@ -106,20 +106,20 @@
 \begin{itemize}
     \item Define $q$ distribution, which will be our approximation to the latent posterior $p\bigl( z \,\vert\, x, \theta \bigr)$:
     \begin{align}
-        q_{nz_n} &\approx p\bigl( z_n \,\vert\, x_n, \theta \bigr) && \text{(Approximate latent posterior)}
+        q(z_n) &\approx p\bigl( z_n \,\vert\, x_n, \theta \bigr) && \text{(Approximate latent posterior)}
     \end{align}
     \item Expand the log likelihood:
     \begin{align}
         & \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \nonumber \\
-        &= \sum_{n=1}^N \left[ \sum_{z_n} \left[ q_{nz_n}\log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \right] && \text{(Marginalise over latents)} \\
-        &= \sum_{n=1}^N \left[ \sum_{z_n} \left[ q_{nz_n}\log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{p\bigl(z_n \,\vert\, x_n, \theta\bigr)} \right) \right] \right] && \text{(Product rule)} \\
+        &= \sum_{n=1}^N \left[ \sum_{z_n} \left[ q(z_n)\log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \right] && \text{(Marginalise over latents)} \\
+        &= \sum_{n=1}^N \left[ \sum_{z_n} \left[ q(z_n)\log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{p\bigl(z_n \,\vert\, x_n, \theta\bigr)} \right) \right] \right] && \text{(Product rule)} \\
         &= \sum_{n=1}^N \Biggl[ \sum_{z_n} \Biggl[ \nonumber \\
-        &\qquad\qquad q_{nz_n}\log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{q_{nz_n}} \right) \nonumber \\
-        &\qquad\qquad +q_{nz_n}\log\left( \frac{q_{nz_n}}{p\bigl(z_n \,\vert\, x_n, \theta\bigr)} \right) \nonumber \\
-        &\qquad \Biggr] \Biggr] && \text{($\times q_{nz_n} / q_{nz_n}$ and separate)} \label{eq:NLL decomposition} \\
+        &\qquad\qquad q(z_n)\log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{q(z_n)} \right) \nonumber \\
+        &\qquad\qquad +q(z_n)\log\left( \frac{q(z_n)}{p\bigl(z_n \,\vert\, x_n, \theta\bigr)} \right) \nonumber \\
+        &\qquad \Biggr] \Biggr] && \text{($\times q(z_n) / q(z_n)$ and separate)} \label{eq:NLL decomposition} \\
         &= \sum_{n=1}^N \Biggl[ \nonumber \\
-        &\qquad\qquad \mathbb{E}_{z_n\sim q_{nz_n}}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] + \mathcal{H}_{z_n} \Bigl[ q_{nz_n} \Bigr] \nonumber \\
-        &\qquad\qquad + \text{KL}_{z_n}\Bigl[ q_{nz_n} \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \nonumber \\
+        &\qquad\qquad \mathbb{E}_{z_n\sim q}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] + \mathcal{H} \Bigl[ q(z_n) \Bigr] \nonumber \\
+        &\qquad\qquad + \text{KL}\Bigl[ q(z_n) \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \nonumber \\
         &\qquad \Biggr] && \text{(Apply definitions)}
     \end{align}
 \end{itemize}
@@ -131,21 +131,21 @@
     \item Recall expression for log likelihood:
     \begin{align}
         \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \Biggl[ \nonumber \\
-        &\qquad\qquad \mathbb{E}_{z_n\sim q_{nz_n}}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] + \mathcal{H}_{z_n} \Bigl[ q_{nz_n} \Bigr] \nonumber \\
-        &\qquad\qquad + \text{KL}_{z_n}\Bigl[ q_{nz_n} \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \nonumber \\
+        &\qquad\qquad \mathbb{E}_{z_n\sim q}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] + \mathcal{H} \Bigl[ q(z_n) \Bigr] \nonumber \\
+        &\qquad\qquad + \text{KL}\Bigl[ q(z_n) \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \nonumber \\
         &\qquad \Biggr]
     \end{align}
     \item EM algorithm proceeds in 2 alternating steps:
     \begin{enumerate}
         \item E step:
         \begin{align}
-            q_n &\leftarrow \underset{q_n}{\text{argmin}}\left[ \text{KL}_{z_n}\Bigl[ q_{nz_n} \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \right] \\
+            q(z_n) &\leftarrow \underset{q(z_n)}{\text{argmin}}\left[ \text{KL}\Bigl[ q(z_n) \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \right] \\
             &= p\bigl(z_n \,\vert\, x_n, \theta\bigr)
         \end{align}
         \item M step:
         \begin{align}
-            \theta &\leftarrow \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \mathbb{E}_{z_n\sim q_{nz_n}}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] \right] \right] \\
-            &= \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \sum_{z_n}\left[ q_{nz_n} \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] \right] \right]
+            \theta &\leftarrow \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \mathbb{E}_{z_n\sim q}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] \right] \right] \\
+            &= \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \sum_{z_n}\left[ q(z_n) \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] \right] \right]
         \end{align}
     \end{enumerate}
 \end{itemize}
@@ -157,8 +157,8 @@
     \item Compare original objective function, E step, and M step:
     \begin{align}
         \theta^* &= \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \log\left( \sum_{z_n} \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \right) \right] \right] && \text{(Original objective)} \\
-        q_n &\leftarrow \underset{q_n}{\text{argmin}}\left[ \text{KL}_{z_n}\Bigl[ q_{nz_n} \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \right] && \text{(E step)} \\
-        \theta &\leftarrow \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \sum_{z_n}\left[ q_{nz_n} \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] \right] \right] && \text{(M step)}
+        q_n &\leftarrow \underset{q_n}{\text{argmin}}\left[ \text{KL}\Bigl[ q(z_n) \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \right] && \text{(E step)} \\
+        \theta &\leftarrow \underset{\theta}{\text{argmax}}\left[ \sum_{n=1}^N \left[ \sum_{z_n}\left[ q(z_n) \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] \right] \right] && \text{(M step)}
     \end{align}
     \item E step is tractable by assumption (EG for GMM)
     \item M step is tractable (EG for GMM) because sum appears \emph{outside} log (unlike original objective)
