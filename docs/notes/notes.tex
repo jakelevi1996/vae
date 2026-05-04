@@ -28,11 +28,12 @@
     Jake Levi $\cdot$ \today
 \end{center}
 
-\section{Historical context and impact in 2010s deep learning}
+\section{Historical context}
 
 \begin{itemize}
-    \item VAE paper \cite{kingma2013auto} first appeared on Arxiv on Fri, 20 Dec 2013 (currently 55k citations)
-    \item A paper proposing similar ideas, but much less cited (7k vs 55k) appears on 16 Jan 2014 \cite{rezende2014stochastic}
+    \item VAE paper \cite{kingma2013auto} first appeared on Arxiv on Fri, 20 Dec 2013
+    \item A paper proposing similar ideas, but much less cited (7k vs 55k) appears 27 days later on 16 Jan 2014 \cite{rezende2014stochastic}
+    \item VAE \emph{foundational} in deep generative modelling
     \item Historical context, relative to 2010s era deep learning research:
 \end{itemize}
 
@@ -45,7 +46,11 @@
         ``Xavier''/``Glorot'' initialisation & 2010 & \cite{glorot2010understanding} & 30k \\
         AlexNet & 2012 & \cite{krizhevsky2012imagenet} & 155k \\
         Dropout & 2012 & \cite{hinton2012improving} & 13k \\
-        \textbf{\underline{VAE}} & \textbf{\underline{2013}} & \cite{kingma2013auto} & \textbf{\underline{55k}} \\
+        \hline
+        \hline
+        \textbf{VAE} & \textbf{2013} & \textbf{\cite{kingma2013auto}} & \textbf{55k} \\
+        \hline
+        \hline
         VGGNet & 2014 & \cite{simonyan2014very} & 161k \\
         Adam & 2014 & \cite{kingma2014adam} & 243k \\
         Neural attention & 2014 & \cite{bahdanau2014neural} & 43k \\
@@ -63,6 +68,40 @@
     \end{tabular}
 \end{center}
 
+\begin{itemize}
+    \item[$\Rightarrow$] Many fundamental DL techniques we take for granted (Adam, ResNets, BatchNorm/LayerNorm, etc) weren't around when VAE was published
+\end{itemize}
+
+\newpage
+\section{VI intro: EM algorithm (setup)}
+
+\begin{itemize}
+    \item VAE builds on VI
+    \item EM = good conceptual intro to VI
+    \item Problem: suppose we have a probabilistic model with IID observed data $x_i$, latent variables $z_i$, and parameters $\theta$ for $i\in\{1,\dots,N\}$:
+    \begin{align}
+        p\bigl(x_i, z_i \,\vert\, \theta\bigr) &= p\bigl( z_i \,\vert\, \theta \bigr)\;p\bigl( x_i \,\vert\, z_i, \theta \bigr) && \text{(Joint/generative model)}
+    \end{align}
+    \item EG textbook example = GMM:
+    \begin{align}
+        p\bigl(x_i, z_i \,\vert\, \theta\bigr) &= \pi_{(z_i)}\;\mathcal{N}\left( x_i \;\middle\vert\; \mu_{(z_i)}, \sigma_{(z_i)}^2 \right) && \text{(GMM joint distribution)}
+    \end{align}
+    \item Want to find parameters $\theta^*$ that maximise likelihood of observed data (minimise NLL):
+    \begin{align}
+        \theta^* &= \underset{\theta}{\text{argmin}}\Bigl[ \mathcal{L}(x, \theta) \Bigr] && \text{(Optimal parameters)} \\
+        \mathcal{L}(x, \theta) &= -\log\bigl( p\bigl(x \,\vert\, \theta\bigr) \bigr) && \text{(Loss function: NLL)} \\
+        &= -\sum_{i=1}^n \left[ \log\Bigl( p\bigl(x_i \,\vert\, \theta\bigr) \Bigr) \right] && \text{(Sum over data points)} \\
+        &= -\sum_{i=1}^n \left[ \log\left( \sum_{z_i} \Bigl[ p\bigl(x_i, z_i \,\vert\, \theta\bigr) \Bigr] \right) \right] && \text{(Marginalise over latents)} \label{eq:EM loss function}
+    \end{align}
+    \item Assume easy to:
+    \begin{enumerate}
+        \item Find latent posterior $p\bigl( z_i \,\vert\, x_i, \theta \bigr)$
+        \item Find $\theta^*$ which maximises $p\bigl(x, z \,\vert\, \theta\bigr)$ when $z$ are known (don't need to marginalise)
+    \end{enumerate}
+    \item BUT, in general, no closed-form solution to Equation \ref{eq:EM loss function} (because of sum inside log)
+\end{itemize}
+
+\newpage
 \bibliographystyle{apalike}
 \bibliography{../references}
 
