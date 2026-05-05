@@ -30,7 +30,7 @@
     \frametitle{Historical context}
     \begin{itemize}
         \item VAE paper \cite{kingma2013auto} Arxived on Fri, 20 Dec 2013
-        \item Similar \cite{rezende2014stochastic} paper published 27 days later
+        \item Similar paper \cite{rezende2014stochastic} published 27 days later
         \begin{itemize}
             \item 7k vs 55k citations
         \end{itemize}
@@ -72,7 +72,7 @@
     \end{center}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[t]
     \frametitle{VAE problem setting}
     \begin{itemize}
         \item Assume probabilistic model with IID observed data $x_n$, latent variables $z_n$, and true parameters $\theta^*$, $n\in\{1,\dots,N\}$:
@@ -86,6 +86,50 @@
             \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \\
             &= \sum_{n=1}^N \left[ \log\left( \sum_{z_n} \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \right) \right]
         \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[t]
+    \frametitle{ELBO derivation}
+    \begin{itemize}
+        \item Define $q$ distribution (approximate latent posterior) and $\phi$:
+        \begin{align*}
+            q(z_n \vert x_n, \phi) \approx p(z_n \vert x_n, \theta)
+        \end{align*}
+        \item Expand log likelihood for each datapoint:
+        \begin{align*}
+            & \log\Bigl(p(x_n \vert \theta)\Bigr) \tag{Log likelihood} \\
+            &= \sum_{z_n} \left[ q(z_n \vert x_n, \phi) \log\Bigl(p(x_n \vert \theta)\Bigr) \right] \tag{Marginalise $q$} \\
+            &= \sum_{z_n} \left[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{p(z_n \vert x_n, \theta)} \right) \right] \tag{Product rule $z_n \vert x_n$} \\
+            &= \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \\
+            &\qquad + q(z_n \vert x_n, \phi) \log\left( \frac{q(z_n \vert x_n, \phi)}{p(z_n \vert x_n, \theta)} \right) \biggr] \tag{$\times\frac{q(z_n \vert x_n, \phi)}{q(z_n \vert x_n, \phi)}$}
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[t]
+    \frametitle{ELBO derivation}
+    \begin{align*}
+        &= \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \\
+        &\qquad + q(z_n \vert x_n, \phi) \log\left( \frac{q(z_n \vert x_n, \phi)}{p(z_n \vert x_n, \theta)} \right) \biggr] \tag{From previous slide} \\
+        &= \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \\
+        &\qquad + \text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert x_n, \theta)\Bigr] \biggr] \tag{KL definition} \\
+        &\ge \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \biggr] \tag{KL $\ge 0$; ELBO v1}
+    \end{align*}
+\end{frame}
+
+\begin{frame}[t]
+    \frametitle{ELBO derivation}
+    \begin{align*}
+        &\ge \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \biggr] \tag{From previous slide} \\
+        &= \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n \vert z_n, \theta)\;p(z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \biggr] \tag{Product rule* $x_n\vert z_n$} \\
+        &= -\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr] \\
+        &\qquad + \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\Bigl[ \log p(x_n \vert z_n, \theta) \Bigr] \tag{Separate, apply definitions} \\
+        &= \mathcal{L}(x_n, \theta, \phi) \tag{Define ELBO v2}
+    \end{align*}
+    \begin{itemize}
+        \item Interpretation: regularise $z_n$, reconstruct $x_n$
+        \item NB $\mathcal{L}$ shorthand for ``ELBO'', not ``loss'' (we will maximise $\mathcal{L}$)
     \end{itemize}
 \end{frame}
 
