@@ -75,8 +75,7 @@
 \section{VI intro: EM algorithm (setup)}
 
 \begin{itemize}
-    \item VAE builds on VI
-    \item VI (conceptually) builds on EM
+    \item VAE builds on VI, which builds (conceptually) on EM
     \item Problem: suppose we have a probabilistic model with IID observed data $x_n$, latent variables $z_n$, and parameters $\theta$ for $n\in\{1,\dots,N\}$:
     \begin{align}
         p\bigl(x_n, z_n \,\vert\, \theta\bigr) &= p\bigl( z_n \,\vert\, \theta \bigr)\;p\bigl( x_n \,\vert\, z_n, \theta \bigr) && \text{(Joint/generative model)}
@@ -92,12 +91,8 @@
         \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] && \text{(Sum over data points)} \\
         &= \sum_{n=1}^N \left[ \log\left( \sum_{z_n} \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \right) \right] && \text{(Marginalise over latents)} \label{eq:EM objective function}
     \end{align}
-    \item Assume easy to:
-    \begin{enumerate}
-        \item Find latent posterior $p\bigl( z_n \,\vert\, x_n, \theta \bigr)$ (EG cluster assignments in GMM)
-        \item Find $\theta^*$ which maximises $p\bigl(x, z \,\vert\, \theta\bigr)$ when $z$ are known (don't need to marginalise)
-    \end{enumerate}
-    \item BUT, in general, no closed-form solution to Equation \ref{eq:EM objective function} (because of sum inside log)
+    \item Assume tractable latent posterior $p\bigl( z_n \,\vert\, x_n, \theta \bigr)$ (EG cluster assignments in GMM)
+    \item BUT no closed-form solution for $\theta^*$ in Equation \ref{eq:EM objective function} (because of sum inside log)
 \end{itemize}
 
 \newpage
@@ -112,11 +107,11 @@
     \begin{align}
         & \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \nonumber \\
         &= \sum_{n=1}^N \left[ \sum_{z_n} \left[ q(z_n)\log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \right] && \text{(Marginalise over latents)} \\
-        &= \sum_{n=1}^N \left[ \sum_{z_n} \left[ q(z_n)\log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{p\bigl(z_n \,\vert\, x_n, \theta\bigr)} \right) \right] \right] && \text{(Product rule)} \\
+        &= \sum_{n=1}^N \left[ \sum_{z_n} \left[ q(z_n)\log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{p\bigl(z_n \,\vert\, x_n, \theta\bigr)} \right) \right] \right] && \text{(Product rule)} \label{eq:first product rule} \\
         &= \sum_{n=1}^N \Biggl[ \sum_{z_n} \Biggl[ \nonumber \\
         &\qquad\qquad q(z_n)\log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{q(z_n)} \right) \nonumber \\
         &\qquad\qquad +q(z_n)\log\left( \frac{q(z_n)}{p\bigl(z_n \,\vert\, x_n, \theta\bigr)} \right) \nonumber \\
-        &\qquad \Biggr] \Biggr] && \text{($\times q(z_n) / q(z_n)$ and separate)} \label{eq:NLL decomposition} \\
+        &\qquad \Biggr] \Biggr] && \left(\times \frac{q(z_n)}{q(z_n)} \text{ and separate}\right) \label{eq:NLL decomposition} \\
         &= \sum_{n=1}^N \Biggl[ \nonumber \\
         &\qquad\qquad \mathbb{E}_{z_n\sim q}\left[ \log\Bigl( p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr) \right] + \mathcal{H} \Bigl[ q(z_n) \Bigr] \nonumber \\
         &\qquad\qquad + \text{KL}\Bigl[ q(z_n) \Bigm\Vert p\bigl(z_n \,\vert\, x_n, \theta\bigr) \Bigr] \nonumber \\
@@ -164,7 +159,7 @@
     \item M step is tractable (EG for GMM) because sum appears \emph{outside} log (unlike original objective)
     \item Each iteration (E step + M step) is \emph{guaranteed} to improve objective function:
     \begin{itemize}
-        \item E step sets $q$ so KL terms are zero, but objective function $\not\ni$ dependence on $q$ $\Rightarrow$ no change
+        \item E step sets $q$ so KL terms are zero, but objective function $\ne$ depends on $q$ $\Rightarrow$ no change
         \item M step sets $\theta$ to increase expected log joint distribution \emph{and KL terms increase from zero} (because latent posterior changes but $q$ remains fixed) $\Rightarrow$ ``double'' improvement
     \end{itemize}
 \end{itemize}
@@ -204,7 +199,7 @@
 \section{Defining the ELBO}
 
 \begin{itemize}
-    \item Derive ELBO (``Evidence Lower BOund'') from earlier decomposition of log likelihood:
+    \item ELBO (``Evidence Lower BOund'') = bound on earlier decomposition of log likelihood:
     \begin{align}
         \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \Biggl[ \nonumber \\
         &\qquad\qquad \mathbb{E}_{z_n\sim q} \left[ \log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{q(z_n \,\vert\, x_n, \phi)} \right) \right] \nonumber \\
@@ -224,10 +219,35 @@
     \item We can simplify $\mathcal{L}$ further:
     \begin{align}
         \mathcal{L}\bigl( x_n, \theta, \phi \bigr) &= \mathbb{E}_{z_n\sim q} \left[ \log\left( \frac{p\bigl(x_n, z_n \,\vert\, \theta\bigr)}{q(z_n \,\vert\, x_n, \phi)} \right) \right] && \text{(From (\ref{eq:define ELBO}))}\\
-        &= \mathbb{E}_{z_n\sim q} \left[ \log\left( \frac{p\bigl(z_n \,\vert\, \theta\bigr)}{q(z_n \,\vert\, x_n, \phi)} \right) + \log \Bigl( p\bigl(x_n \,\vert\, z_n, \theta\bigr) \Bigr) \right] && \text{(Product rule)} \\
+        &= \mathbb{E}_{z_n\sim q} \left[ \log\left( \frac{p\bigl(z_n \,\vert\, \theta\bigr)}{q(z_n \,\vert\, x_n, \phi)} \right) + \log \Bigl( p\bigl(x_n \,\vert\, z_n, \theta\bigr) \Bigr) \right] && \text{(Product rule*)} \\
         &= \text{KL}\Bigl[ q(z_n \,\vert\, x_n, \phi) \Bigm\Vert p\bigl(z_n \,\vert\, \theta\bigr) \Bigr] + \mathbb{E}_{z_n\sim q} \left[ \log \Bigl( p\bigl(x_n \,\vert\, z_n, \theta\bigr) \Bigr) \right] && \text{(KL definition)}
     \end{align}
-    \item \$1mQ: how to evaluate/estimate these terms when $q(z_n \,\vert\, x_n, \phi), p\bigl(x_n \,\vert\, z_n, \theta\bigr)$ are neural networks?
+    \item *NB \emph{opposite} to the one we used in (\ref{eq:first product rule})
+    \item \$1mQ: how to estimate gradients of $\mathcal{L}$ when $q(z_n \,\vert\, x_n, \phi), p\bigl(x_n \,\vert\, z_n, \theta\bigr)$ are neural networks?
+\end{itemize}
+
+\newpage
+\section{Evaluating the KL}
+
+\begin{itemize}
+    \item We want to evaluate the KL term in the ELBO:
+    \begin{align}
+        \mathcal{L}\bigl( x_n, \theta, \phi \bigr) &= \underbrace{\text{KL}\Bigl[ q(z_n \,\vert\, x_n, \phi) \Bigm\Vert p\bigl(z_n \,\vert\, \theta\bigr) \Bigr]}_? + \mathbb{E}_{z_n\sim q} \left[ \log \Bigl( p\bigl(x_n \,\vert\, z_n, \theta\bigr) \Bigr) \right]
+    \end{align}
+    \item Define recognition model $q(z_n \,\vert\, x_n, \phi)$ as diagonal Gaussian (EG $\mu$ and $\sigma$ from MLP):
+    \begin{align}
+        q(z_n \,\vert\, x_n, \phi) &= \mathcal{N}( z_n \;\vert\; \mu, \text{diag}(\sigma) ) \\
+        \mu &= f_\mu(x_n, \phi) \\
+        \sigma &= f_\sigma(x_n, \phi)
+    \end{align}
+    \item Assume:
+    \begin{align}
+        p\bigl(z_n \,\vert\, \theta\bigr) &= \mathcal{N}(z_n \;\vert\; 0, I )
+    \end{align}
+    \item[$\Rightarrow$] Can derive KL in closed form:
+    \begin{align}
+        \text{KL}\Bigl[ q(z_n \,\vert\, x_n, \phi) \Bigm\Vert p\bigl(z_n \,\vert\, \theta\bigr) \Bigr] &= \frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]
+    \end{align}
 \end{itemize}
 
 \newpage
