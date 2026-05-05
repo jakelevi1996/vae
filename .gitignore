@@ -18,3 +18,5 @@ __pycache__
 *.cut
 *.brf
 *.toc
+*.nav
+*.snm

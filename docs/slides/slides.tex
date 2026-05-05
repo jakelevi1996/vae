@@ -1,0 +1,102 @@
+\documentclass[xcolor=table]{beamer}
+
+\usepackage{setspace}
+
+\usetheme{Madrid}
+\usecolortheme{default}
+
+\graphicspath{{../..}}
+\hbadness 10000
+\vbadness 10000
+\hfuzz 100pt
+\vfuzz 100pt
+\righthyphenmin 100
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{enumerate items}[default]
+\setbeamertemplate{section in toc}[circle]
+
+\title{Variational Autoencoders}
+\author{Jake Levi}
+\date{OccaMLab Reading Group \\ 13 May 2026}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+    \frametitle{Historical context}
+    \begin{itemize}
+        \item VAE paper \cite{kingma2013auto} Arxived on Fri, 20 Dec 2013
+        \item Similar \cite{rezende2014stochastic} paper published 27 days later
+        \begin{itemize}
+            \item 7k vs 55k citations
+        \end{itemize}
+        \item Adam, ResNets, BatchNorm/LayerNorm, etc not yet around
+        \item VAEs relative to 2010s era deep learning research:
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[shrink=20]
+    \frametitle{Historical context}
+    \begin{center}
+        \begin{tabular}{l c l r}
+            \hline
+            \textbf{Contribution} & \textbf{Year} & \textbf{Reference} & \textbf{\# Citations} \\
+            \hline
+            ``Xavier''/``Glorot'' initialisation & 2010 & \cite{glorot2010understanding} & 30k \\
+            AlexNet & 2012 & \cite{krizhevsky2012imagenet} & 155k \\
+            Dropout & 2012 & \cite{hinton2012improving} & 13k \\
+            \hline
+            \hline
+            \textbf{VAE} & \textbf{2013} & \textbf{\cite{kingma2013auto}} & \textbf{55k} \\
+            \hline
+            \hline
+            VGGNet & 2014 & \cite{simonyan2014very} & 161k \\
+            Adam & 2014 & \cite{kingma2014adam} & 243k \\
+            Neural attention & 2014 & \cite{bahdanau2014neural} & 43k \\
+            GANs & 2014 & \cite{goodfellow2014generative} & 94k \\
+            BatchNorm & 2015 & \cite{ioffe2015batch} & 68k \\
+            ResNet & 2015 & \cite{he2016deep} & 318k \\
+            ``Kaiming''/``He'' initialisation & 2015 & \cite{he2015delving} & 30k \\
+            Diffusion & 2015 & \cite{sohl2015deep} & 12k \\
+            LayerNorm & 2016 & \cite{ba2016layer} & 19k \\
+            Transformers & 2017 & \cite{vaswani2017attention} & 245k \\
+            BERT & 2018 & \cite{devlin2019bert} & 168k \\
+            GPT-1 & 2018 & \cite{radford2018improving} & 19k \\
+            GPT-2 & 2019 & \cite{radford2019language} & 25k \\
+            \hline
+        \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}
+    \frametitle{VAE problem setting}
+    \begin{itemize}
+        \item Assume probabilistic model with IID observed data $x_n$, latent variables $z_n$, and true parameters $\theta^*$, $n\in\{1,\dots,N\}$:
+        \begin{align*}
+            p\bigl(x_n, z_n \,\vert\, \theta^*\bigr) &= p\bigl( z_n \,\vert\, \theta^* \bigr)\;p\bigl( x_n \,\vert\, z_n, \theta^* \bigr)
+        \end{align*}
+        \item Sample $z_n$ $\rightarrow$ sample $x_n$ given $z_n$ $\rightarrow$ observe $x_n$
+        \item We want to find ML parameters:
+        \begin{align*}
+            \theta_\text{ML} &= \underset{\theta}{\text{argmax}}\left[ \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) \right] \\
+            \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \\
+            &= \sum_{n=1}^N \left[ \log\left( \sum_{z_n} \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \right) \right]
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Frame title 1}
+    \begin{itemize}
+        \item Blah blah blah
+    \end{itemize}
+\end{frame}
+
+\bibliographystyle{apalike}
+\bibliography{../references}
+
+\end{document}
