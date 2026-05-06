@@ -321,6 +321,22 @@
 \end{frame}
 
 \begin{frame}
+    \frametitle{ELBO estimator}
+    \begin{itemize}
+        \item Now we have a differentiable + unbiased ELBO estimator:
+    \end{itemize}
+    \begin{align*}
+        \mathcal{L}(x_n, \theta, \phi) &= \textcolor{blue}{{-\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr]}} \\
+        &\qquad + \textcolor{OliveGreen}{\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right]} \tag{ELBO} \\
+        (\mu, \sigma) &= \text{MLP}_\text{enc}(x_n, \phi) \tag{Encoder computation} \\
+        \varepsilon^{(l)} &\sim \mathcal{N}(\varepsilon^{(l)} \vert 0, I) \tag{Auxiliary noise samples} \\
+        \hat{\mathcal{L}}(x_n, \theta, \phi) &= \textcolor{blue}{\frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]} \\
+        &\qquad + \textcolor{OliveGreen}{\frac{1}{L}\sum_{l=1}^L\Biggl[ \log \biggl(p\Bigl(x_n \Bigm\vert \mu + \varepsilon^{(l)} \odot \sigma, \theta\Bigr)\biggr) \Biggr]} \tag{Estimator} \\
+        \mathbb{E}\Bigl[ \hat{\mathcal{L}}(x_n, \theta, \phi) \Bigr] &= \mathcal{L}(x_n, \theta, \phi) \tag{Unbiased \Smiley}
+    \end{align*}
+\end{frame}
+
+\begin{frame}
     \frametitle{Frame title 1}
     \begin{itemize}
         \item Blah blah blah
