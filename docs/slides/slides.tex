@@ -328,11 +328,29 @@
     \begin{align*}
         \mathcal{L}(x_n, \theta, \phi) &= \textcolor{blue}{{-\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr]}} \\
         &\qquad + \textcolor{OliveGreen}{\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right]} \tag{ELBO} \\
+        \\
+        \widehat{\mathcal{L}}(x_n, \theta, \phi) &= \textcolor{blue}{\frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]} \\
+        &\qquad + \textcolor{OliveGreen}{\frac{1}{L}\sum_{l=1}^L\Biggl[ \log \biggl(p\Bigl(x_n \Bigm\vert \mu + \varepsilon^{(l)} \odot \sigma, \theta\Bigr)\biggr) \Biggr]} \tag{Estimator} \\
+        \\
+        \mathbb{E}\Bigl[ \widehat{\mathcal{L}}(x_n, \theta, \phi) \Bigr] &= \mathcal{L}(x_n, \theta, \phi) \tag{Unbiased \Smiley}
+    \end{align*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{VAE training algorithm}
+    \begin{itemize}
+        \item For each batch of data $\{x_1,x_2,\dots\}$:
+        \begin{itemize}
+            \item For each element $x_n$ in the batch:
+        \end{itemize}
+    \end{itemize}
+    \begin{align*}
         (\mu, \sigma) &= \text{MLP}_\text{enc}(x_n, \phi) \tag{Encoder computation} \\
         \varepsilon^{(l)} &\sim \mathcal{N}(\varepsilon^{(l)} \vert 0, I) \tag{Auxiliary noise samples} \\
-        \hat{\mathcal{L}}(x_n, \theta, \phi) &= \textcolor{blue}{\frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]} \\
-        &\qquad + \textcolor{OliveGreen}{\frac{1}{L}\sum_{l=1}^L\Biggl[ \log \biggl(p\Bigl(x_n \Bigm\vert \mu + \varepsilon^{(l)} \odot \sigma, \theta\Bigr)\biggr) \Biggr]} \tag{Estimator} \\
-        \mathbb{E}\Bigl[ \hat{\mathcal{L}}(x_n, \theta, \phi) \Bigr] &= \mathcal{L}(x_n, \theta, \phi) \tag{Unbiased \Smiley}
+            z_n^{(l)} &= \mu + \varepsilon^{(l)} \odot \sigma \tag{Latent posterior samples} \\
+        \widehat{\mathcal{L}}(x_n, \theta, \phi) &= \textcolor{blue}{\frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]} \\
+        &\qquad + \textcolor{OliveGreen}{\frac{1}{L}\sum_{l=1}^L\Biggl[ \log \Bigl(\underbrace{p(x_n \vert z_n, \theta)}_{\text{MLP}_\text{dec}}\Bigr) \Biggr]} \tag{$\widehat{\text{ELBO}}$} \\
+        (\theta, \phi) &\leftarrow (\theta, \phi) - \frac{\partial}{\partial (\theta, \phi)} \left[\sum_n \Bigl[ -\widehat{\mathcal{L}}(x_n, \theta, \phi) \Bigr]\right] \tag{SGD}
     \end{align*}
 \end{frame}
 
