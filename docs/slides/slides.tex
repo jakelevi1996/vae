@@ -293,7 +293,7 @@
             (\mu, \sigma) &= \text{MLP}_\text{enc}(x_n, \phi) \tag{Encoder computation} \\
             q(z_n \,\vert\, x_n, \phi) &= \mathcal{N}\Bigl( z_n \Bigm\vert \mu, \text{diag}(\sigma)^2 \Bigr) \tag{Encoder distribution}
         \end{align}
-        \item[$\Rightarrow$] ``Reparameterise'' $z_n$ as transform of auxiliary noise variable $\varepsilon$:
+        \item ``Reparameterise'' $z_n$ as transform of auxiliary noise variable $\varepsilon$:
         \begin{align*}
             \varepsilon &\sim \mathcal{N}(\varepsilon \vert 0, I) \tag{Auxiliary noise sample} \\
             z_n &= \mu + \varepsilon \odot \sigma \tag{Reparameterisation trick} \\
@@ -359,8 +359,12 @@
     \begin{align*}
         z&\sim \mathcal{N}(z\vert 0, I) \tag{Sample latent from prior} \\
         \\
-        x&\sim \underbrace{p(x_n \vert z_n, \theta)}_{\text{MLP}_\text{dec}} \tag{Decode}
+        x&\sim \underbrace{p(x_n \vert z_n, \theta)}_{\text{MLP}_\text{dec}} \tag{Sample from decoder}
     \end{align*}
+    \vfill
+    \begin{itemize}
+        \item NB don't use $q$ or $\phi$ during sampling
+    \end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -368,6 +372,12 @@
     \begin{itemize}
         \item Blah blah blah
     \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{The end.}
+    \centering
+    \includegraphics{example-image-duck}
 \end{frame}
 
 \bibliographystyle{apalike}
