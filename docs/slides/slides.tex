@@ -1,4 +1,4 @@
-\documentclass[xcolor=table]{beamer}
+\documentclass[xcolor=table,dvipsnames]{beamer}
 
 \usepackage{setspace}
 
@@ -150,7 +150,18 @@
     \end{align*}
     \begin{itemize}
         \item NB $\mathcal{L}$ shorthand for ``ELBO'', not ``loss'' (we will maximise $\mathcal{L}$)
-        \item Interpretation: regularise $z_n$, reconstruct $x_n$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{ELBO interpretation}
+    \begin{align*}
+        \underbrace{\mathcal{L}(x_n, \theta, \phi)}_\text{Objective function} &= \textcolor{blue}{\underbrace{-\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr]}_{\text{Regularise $z_n$}}} \\
+        &\qquad + \textcolor{OliveGreen}{\underbrace{\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right]}_{\text{Reconstruct $x_n$}}} \tag{ELBO} \\
+        &\le \log\Bigl(p(x_n \vert \theta)\Bigr) \tag{Log likelihood}
+    \end{align*}
+    \begin{itemize}
+        \item \$1mQ: How to estimate gradients WRT $\theta,\phi$ using BP?
     \end{itemize}
 \end{frame}
 
