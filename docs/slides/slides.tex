@@ -33,8 +33,8 @@
     \frametitle{Historical context}
     \begin{itemize}
         \setlength{\itemsep}{2em}
-        \item VAE paper \cite{kingma2013auto} Arxived on Fri, 20 Dec 2013
-        \item Similar paper \cite{rezende2014stochastic} published 27 days later
+        \item VAE \cite{kingma2013auto} Arxived on Fri, 20 Dec 2013
+        \item Similar \cite{rezende2014stochastic} published 27 days later
         \item 55k vs 7k citations
         \item Adam, ResNets, BatchNorm/LayerNorm, etc don't yet exist
         \item VAEs relative to 2010s era deep learning research:
@@ -146,7 +146,7 @@
         &\qquad\quad + q(z_n \vert x_n, \phi) \log \Bigl( p(x_n \vert z_n, \theta) \Bigr) \biggr] \tag{Product rule* $x_n\vert z_n$} \\
         &= -\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr] \\
         &\qquad + \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right] \tag{KL and $\mathbb{E}$ definitions} \\
-        &= \mathcal{L}(x_n, \theta, \phi) \tag{Define ELBO v2}
+        &= \mathcal{L}(x_n, \theta, \phi) \tag{ELBO, VAE version}
     \end{align*}
     \begin{itemize}
         \item NB $\mathcal{L}$ shorthand for ``ELBO'', not ``loss'' (we will maximise $\mathcal{L}$)
@@ -161,14 +161,14 @@
         &\le \log\Bigl(p(x_n \vert \theta)\Bigr) \tag{Log likelihood}
     \end{align*}
     \begin{itemize}
-        \item \$1mQ: How to estimate gradients WRT $\theta,\phi$ using BP?
+        \item \$1mQ: How to estimate $\frac{\partial\mathcal{L}}{\partial\{\theta,\phi\}}$ using BP?
     \end{itemize}
 \end{frame}
 
 \begin{frame}[t]
     \frametitle{Evaluating KL}
     \begin{itemize}
-        \item Want to evaluate KL term:
+        \item Want to evaluate \textcolor{blue}{KL} term:
         \begin{align*}
             \mathcal{L}(x_n, \theta, \phi) &= -\textcolor{blue}{\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr]} \\
             &\qquad + \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right] \tag{ELBO}
@@ -188,16 +188,81 @@
 \begin{frame}[t]
     \frametitle{Evaluating KL}
     \begin{itemize}
-        \item Want to evaluate KL term:
+        \item Want to evaluate \textcolor{blue}{KL} term:
         \begin{align*}
             \mathcal{L}(x_n, \theta, \phi) &= -\textcolor{blue}{\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr]} \\
-            &\qquad + \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right] \tag{ELBO} \\
+            &\qquad + \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right] \tag{ELBO}
+        \end{align*}
+        \hrule
+        \begin{align*}
+            q(z_n \,\vert\, x_n, \phi) &= \mathcal{N}\Bigl( z_n \Bigm\vert \mu, \text{diag}(\sigma)^2 \Bigr) \tag{Encoder distribution} \\
+            p(z_n\vert\theta) &= \mathcal{N}(z_n\vert 0, I) \tag{Prior distribution} \\
+            \\
+            \Rightarrow\quad &\textcolor{blue}{\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr]} \\
+            &= \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \left(\frac{\mathcal{N}\Bigl( z_n \Bigm\vert \mu, \text{diag}(\sigma)^2 \Bigr)}{\mathcal{N}(z_n\vert 0, I)}\right) \right] \tag{KL definition} \\
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[t]
+    \frametitle{Evaluating KL}
+    \begin{itemize}
+        \item Want to evaluate \textcolor{blue}{KL} term:
+        \begin{align*}
+            \mathcal{L}(x_n, \theta, \phi) &= -\textcolor{blue}{\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr]} \\
+            &\qquad + \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right] \tag{ELBO}
+        \end{align*}
+        \hrule
+        \begin{align*}
             q(z_n \,\vert\, x_n, \phi) &= \mathcal{N}\Bigl( z_n \Bigm\vert \mu, \text{diag}(\sigma)^2 \Bigr) \tag{Encoder distribution} \\
             p(z_n\vert\theta) &= \mathcal{N}(z_n\vert 0, I) \tag{Prior distribution} \\
             \\
             \Rightarrow\quad &\textcolor{blue}{\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr]} \\
             &= \textcolor{blue}{\frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]} \tag{\textcolor{blue}{Closed-form KL}}
         \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[t]
+    \frametitle{Score function estimator?}
+    \begin{itemize}
+        \item Want to evaluate \textcolor{OliveGreen}{reconstruction} term:
+        \begin{align*}
+            \mathcal{L}(x_n, \theta, \phi) &= -\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr] \\
+            &\qquad + \textcolor{OliveGreen}{\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right]} \tag{ELBO}
+        \end{align*}
+        \item \emph{Can} evaluate using SFE:
+        \begin{align*}
+            &\frac{\partial}{\partial \phi}\Biggl[\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\biggl[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \biggr]\Biggr] \\
+            &= \frac{\partial}{\partial \phi}\Biggl[\sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \biggr]\Biggr] \tag{$\mathbb{E}=\sum q$} \\
+            &= \sum_{z_n} \Biggl[ \frac{\partial}{\partial \phi}\Bigl[q(z_n \vert x_n, \phi)\Bigr] \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{Swap $\partial$ and $\Sigma$}
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[t]
+    \frametitle{Score function estimator?}
+    \begin{align*}
+        &= \sum_{z_n} \Biggl[ \frac{\partial}{\partial \phi}\Bigl[q(z_n \vert x_n, \phi)\Bigr] \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{From previous slide} \\
+        &= \sum_{z_n} \Biggl[ q(z_n \vert x_n, \phi) \frac{\frac{\partial}{\partial \phi}\Bigl[q(z_n \vert x_n, \phi)\Bigr]}{q(z_n \vert x_n, \phi)} \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{$\times\frac{q}{q}$} \\
+        &= \sum_{z_n} \Biggl[ q(z_n \vert x_n, \phi) \frac{\partial}{\partial \phi}\biggl[\log \Bigl(q(z_n \vert x_n, \phi)\Bigr)\biggr] \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{$\frac{\nabla[q]}{q}=\nabla\bigl[\log(q)\bigr]$} \\
+        &= \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)} \Biggl[ \frac{\partial}{\partial \phi}\biggl[\log \Bigl(q(z_n \vert x_n, \phi)\Bigr)\biggr] \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{$\sum q=\mathbb{E}$} \\
+    \end{align*}
+\end{frame}
+
+\begin{frame}[t]
+    \frametitle{Score function estimator?}
+    \begin{align}
+        \Rightarrow\quad &\frac{\partial}{\partial \phi}\Biggl[\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\biggl[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \biggr]\Biggr] \nonumber \\
+        &= \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)} \Biggl[ \frac{\partial}{\partial \phi}\biggl[\log \Bigl(q(z_n \vert x_n, \phi)\Bigr)\biggr] \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{SFE} \label{eq:SFE}
+    \end{align}
+    \begin{itemize}
+        \setlength{\itemsep}{1em}
+        \item \emph{Can} differentiate (\ref{eq:SFE}) with BP
+        \item \emph{But} (\ref{eq:SFE}) ``exhibits very high variance'' \cite{kingma2013auto}
+        \begin{itemize}
+            \item (Empirical comparison?)
+        \end{itemize}
     \end{itemize}
 \end{frame}
 
