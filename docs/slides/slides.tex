@@ -323,7 +323,7 @@
 \begin{frame}
     \frametitle{ELBO estimator}
     \begin{itemize}
-        \item Now we have a differentiable + unbiased ELBO estimator:
+        \item Now we have a differentiable + unbiased ELBO estimator \Smiley
     \end{itemize}
     \begin{align*}
         \mathcal{L}(x_n, \theta, \phi) &= \textcolor{blue}{{-\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr]}} \\
@@ -332,7 +332,7 @@
         \widehat{\mathcal{L}}(x_n, \theta, \phi) &= \textcolor{blue}{\frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]} \\
         &\qquad + \textcolor{OliveGreen}{\frac{1}{L}\sum_{l=1}^L\Biggl[ \log \biggl(p\Bigl(x_n \Bigm\vert \mu + \varepsilon^{(l)} \odot \sigma, \theta\Bigr)\biggr) \Biggr]} \tag{Estimator} \\
         \\
-        \mathbb{E}\Bigl[ \widehat{\mathcal{L}}(x_n, \theta, \phi) \Bigr] &= \mathcal{L}(x_n, \theta, \phi) \tag{Unbiased \Smiley}
+        \mathbb{E}\Bigl[ \widehat{\mathcal{L}}(x_n, \theta, \phi) \Bigr] &= \mathcal{L}(x_n, \theta, \phi) \tag{Unbiased}
     \end{align*}
 \end{frame}
 
@@ -351,6 +351,15 @@
         \widehat{\mathcal{L}}(x_n, \theta, \phi) &= \textcolor{blue}{\frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]} \\
         &\qquad + \textcolor{OliveGreen}{\frac{1}{L}\sum_{l=1}^L\Biggl[ \log \Bigl(\underbrace{p(x_n \vert z_n, \theta)}_{\text{MLP}_\text{dec}}\Bigr) \Biggr]} \tag{$\widehat{\text{ELBO}}$} \\
         (\theta, \phi) &\leftarrow (\theta, \phi) - \frac{\partial}{\partial (\theta, \phi)} \left[\sum_n \Bigl[ -\widehat{\mathcal{L}}(x_n, \theta, \phi) \Bigr]\right] \tag{SGD}
+    \end{align*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{VAE sampling algorithm}
+    \begin{align*}
+        z&\sim \mathcal{N}(z\vert 0, I) \tag{Sample latent from prior} \\
+        \\
+        x&\sim \underbrace{p(x_n \vert z_n, \theta)}_{\text{MLP}_\text{dec}} \tag{Decode}
     \end{align*}
 \end{frame}
 
