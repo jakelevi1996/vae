@@ -107,7 +107,7 @@
         \item Want to:
         \begin{itemize}
             \item Learn $\theta,\phi$ using BP to maximise $p(x\vert\theta)$
-            \item Use $\theta,\phi$ to sample new data similar to $p(x\vert\theta^*)$
+            \item Use $\theta,\phi$ to sample \emph{new} data $\sim p(x\vert\theta^*)$
         \end{itemize}
         \item Strategy = maximise ELBO
     \end{itemize}
@@ -138,18 +138,55 @@
     \end{align*}
 \end{frame}
 
-\begin{frame}[t]
+\begin{frame}
     \frametitle{ELBO derivation}
     \begin{align*}
         &\ge \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \biggr] \tag{From previous slide} \\
-        &= \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n \vert z_n, \theta)\;p(z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \biggr] \tag{Product rule* $x_n\vert z_n$} \\
+        &= \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \\
+        &\qquad\quad + q(z_n \vert x_n, \phi) \log \Bigl( p(x_n \vert z_n, \theta) \Bigr) \biggr] \tag{Product rule* $x_n\vert z_n$} \\
         &= -\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr] \\
-        &\qquad + \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\Bigl[ \log p(x_n \vert z_n, \theta) \Bigr] \tag{Separate, apply definitions} \\
+        &\qquad + \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right] \tag{KL and $\mathbb{E}$ definitions} \\
         &= \mathcal{L}(x_n, \theta, \phi) \tag{Define ELBO v2}
     \end{align*}
     \begin{itemize}
         \item NB $\mathcal{L}$ shorthand for ``ELBO'', not ``loss'' (we will maximise $\mathcal{L}$)
         \item Interpretation: regularise $z_n$, reconstruct $x_n$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[t]
+    \frametitle{Evaluating KL}
+    \begin{itemize}
+        \item Want to evaluate KL term:
+        \begin{align*}
+            \mathcal{L}(x_n, \theta, \phi) &= -\textcolor{blue}{\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr]} \\
+            &\qquad + \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right] \tag{ELBO}
+        \end{align*}
+        \item Define encoder as diagonal Gaussian:
+        \begin{align}
+            (\mu, \sigma) &= \text{MLP}_\text{enc}(x_n, \phi) \tag{Encoder computation} \\
+            q(z_n \,\vert\, x_n, \phi) &= \mathcal{N}\Bigl( z_n \Bigm\vert \mu, \text{diag}(\sigma)^2 \Bigr) \tag{Encoder distribution}
+        \end{align}
+        \item Assume:
+        \begin{align}
+            p(z_n\vert\theta) = \mathcal{N}(z_n\vert 0, I) \tag{Prior distribution}
+        \end{align}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[t]
+    \frametitle{Evaluating KL}
+    \begin{itemize}
+        \item Want to evaluate KL term:
+        \begin{align*}
+            \mathcal{L}(x_n, \theta, \phi) &= -\textcolor{blue}{\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr]} \\
+            &\qquad + \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right] \tag{ELBO} \\
+            q(z_n \,\vert\, x_n, \phi) &= \mathcal{N}\Bigl( z_n \Bigm\vert \mu, \text{diag}(\sigma)^2 \Bigr) \tag{Encoder distribution} \\
+            p(z_n\vert\theta) &= \mathcal{N}(z_n\vert 0, I) \tag{Prior distribution} \\
+            \\
+            \Rightarrow\quad &\textcolor{blue}{\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr]} \\
+            &= \textcolor{blue}{\frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]} \tag{\textcolor{blue}{Closed-form KL}}
+        \end{align*}
     \end{itemize}
 \end{frame}
 
