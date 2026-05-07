@@ -389,6 +389,20 @@
         z_n &= \mu + \varepsilon \odot \sigma \tag{Latent posterior sample} \\
         \left(\mu^{(x)}, \sigma^{(x)}\right) &= \text{MLP}_\text{dec}(z_n, \theta) \tag{Decoder forward} \\
         \widehat{\mathcal{L}}(x_n, \theta, \phi) &= \textcolor{blue}{\frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]} \\
+        &\qquad + \textcolor{OliveGreen}{\frac{1}{2}\sum_i\left[ -\log(2\pi) - 2\log\left( \sigma^{(x)}_i \right) - \left(\frac{x_{ni}-\mu^{(x)}_i}{\sigma^{(x)}_i}\right)^2 \right]} \tag{$\widehat{\text{ELBO}}$}
+    \end{align*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{VAE training algorithm}
+    \begin{itemize}
+        \item For each batch of data $\{x_1,x_2,\dots\}$:
+        \begin{itemize}
+            \item For each element $x_n$ in the batch:
+        \end{itemize}
+    \end{itemize}
+    \begin{align*}
+        \widehat{\mathcal{L}}(x_n, \theta, \phi) &= \textcolor{blue}{\frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]} \\
         &\qquad + \textcolor{OliveGreen}{\frac{1}{2}\sum_i\left[ -\log(2\pi) - 2\log\left( \sigma^{(x)}_i \right) - \left(\frac{x_{ni}-\mu^{(x)}_i}{\sigma^{(x)}_i}\right)^2 \right]} \tag{$\widehat{\text{ELBO}}$} \\
         (\theta, \phi) &\leftarrow (\theta, \phi) - \frac{\partial}{\partial (\theta, \phi)} \left[\sum_n \Bigl[ -\widehat{\mathcal{L}}(x_n, \theta, \phi) \Bigr]\right] \tag{SGD}
     \end{align*}
