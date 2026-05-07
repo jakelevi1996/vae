@@ -1,1 +1,4 @@
-from vae import data
+from vae import (
+    data,
+    models,
+)
