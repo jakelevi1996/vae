@@ -10,6 +10,7 @@ Demos + presentation of Variational Autoencoders (VAEs)
   - [Results](#results)
     - [`plot_shifted_circle`](#plot_shifted_circle)
     - [`train_vae_circle`](#train_vae_circle)
+    - [`train_vae_mnist`](#train_vae_mnist)
 
 ## Installation
 
@@ -49,3 +50,11 @@ python scripts/train_vae_circle.py --seed 2
 ```
 
 ![](results/train_vae_circle/s2/output.png)
+
+### `train_vae_mnist`
+
+```bash
+python python scripts/train_vae_mnist.py
+```
+
+![](results/train_vae_mnist/e100s0/output.png)

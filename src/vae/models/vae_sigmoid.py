@@ -1,36 +1,9 @@
 import torch
 import juml
-from vae.models.multi_head_mlp import MultiHeadReluMlp
+from vae.models.vae import Vae
 from vae.util import softplus, LOG_2_PI
 
-class Vae(juml.base.Model):
-    def __init__(
-        self,
-        input_dim:          int,
-        latent_dim:         int,
-        hidden_dim:         int,
-        num_hidden_layers:  int,
-        eps:                float=1e-3,
-    ):
-        self._torch_module_init()
-        self.input_dim = input_dim
-        self.latent_dim = latent_dim
-        self.eps = eps
-
-        self.encoder = MultiHeadReluMlp(
-            input_dim=input_dim,
-            output_dims=[latent_dim, latent_dim],
-            hidden_dim=hidden_dim,
-            num_hidden_layers=num_hidden_layers,
-        )
-        self.decoder = MultiHeadReluMlp(
-            input_dim=latent_dim,
-            output_dims=[input_dim, input_dim],
-            hidden_dim=hidden_dim,
-            num_hidden_layers=num_hidden_layers,
-        )
-        self.opt = torch.optim.AdamW(self.parameters())
-
+class VaeSigmoid(Vae):
     def step(self, x_ni: torch.Tensor) -> tuple[float, float, float]:
         mu_z_nh, sigma_logit_z_nh = self.encoder.forward(x_ni)
         sigma_z_nh = softplus(sigma_logit_z_nh) + self.eps
@@ -47,6 +20,7 @@ class Vae(juml.base.Model):
         z_nh = mu_z_nh + eps_nh * sigma_z_nh
 
         mu_x_ni, sigma_logit_x_ni = self.decoder.forward(z_nh)
+        mu_x_ni = mu_x_ni.sigmoid()
         sigma_x_ni = softplus(sigma_logit_x_ni) + self.eps
 
         reconstruct_components = (
@@ -68,6 +42,7 @@ class Vae(juml.base.Model):
         z_nh = torch.normal(0, 1, [n, self.latent_dim])
 
         mu_x_ni, sigma_logit_x_ni = self.decoder.forward(z_nh)
+        mu_x_ni = mu_x_ni.sigmoid()
         sigma_x_ni = softplus(sigma_logit_x_ni) + self.eps
 
         eps_ni = torch.normal(0, 1, [n, self.input_dim])
