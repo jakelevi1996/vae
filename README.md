@@ -8,7 +8,8 @@ Demos + presentation of Variational Autoencoders (VAEs)
   - [Contents](#contents)
   - [Installation](#installation)
   - [Results](#results)
-    - [Visualise dataset](#visualise-dataset)
+    - [`plot_shifted_circle`](#plot_shifted_circle)
+    - [`train_vae_circle`](#train_vae_circle)
 
 ## Installation
 
@@ -21,10 +22,18 @@ python -m pip install -e .
 
 ## Results
 
-### Visualise dataset
+### `plot_shifted_circle`
 
 ```bash
 python scripts/plot_shifted_circle.py
 ```
 
 ![](results/Shifted_Circle_dataset.png)
+
+### `train_vae_circle`
+
+```bash
+python scripts/train_vae_circle.py
+```
+
+![](results/train_vae_circle/output.png)
