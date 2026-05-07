@@ -3,9 +3,10 @@ from jutility import plotting, util, cli
 import juml
 import vae
 
-def main():
-    seed = 0
-
+def main(
+    args:   cli.ParsedArgs,
+    seed:   int,
+):
     latent_dim = 2
     hidden_dim = 100
     num_hidden_layers = 1
@@ -48,7 +49,7 @@ def main():
 
     cp = plotting.ColourPicker.contrast()
 
-    output_dir = "results/train_vae_circle"
+    output_dir = "results/train_vae_circle/%s" % args.get_summary()
 
     mp = plotting.MultiPlot(
         plotting.Subplot(
@@ -82,5 +83,10 @@ def main():
     mp.save(dir_name=output_dir)
 
 if __name__ == "__main__":
+    parser = cli.Parser(
+        cli.Arg("seed", type=int, default=0),
+    )
+    args = parser.parse_args()
+
     with util.Timer("main"):
-        main()
+        main(args, **args.get_kwargs())

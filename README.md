@@ -37,3 +37,15 @@ python scripts/train_vae_circle.py
 ```
 
 ![](results/train_vae_circle/output.png)
+
+```bash
+python scripts/train_vae_circle.py --seed 1
+```
+
+![](results/train_vae_circle/s1/output.png)
+
+```bash
+python scripts/train_vae_circle.py --seed 2
+```
+
+![](results/train_vae_circle/s2/output.png)
