@@ -185,14 +185,14 @@
             &\qquad + \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right] \tag{ELBO}
         \end{align*}
         \item Define encoder as diagonal Gaussian:
-        \begin{align}
-            (\mu, \sigma) &= \text{MLP}_\text{enc}(x_n, \phi) \tag{Encoder computation} \\
+        \begin{align*}
+            (\mu, \sigma) &= \text{MLP}_\text{enc}(x_n, \phi) \tag{Encoder forward} \\
             q(z_n \,\vert\, x_n, \phi) &= \mathcal{N}\Bigl( z_n \Bigm\vert \mu, \text{diag}(\sigma)^2 \Bigr) \tag{Encoder distribution}
-        \end{align}
+        \end{align*}
         \item Assume:
-        \begin{align}
+        \begin{align*}
             p(z_n\vert\theta) = \mathcal{N}(z_n\vert 0, I) \tag{Prior distribution}
-        \end{align}
+        \end{align*}
     \end{itemize}
 \end{frame}
 
@@ -265,10 +265,10 @@
 
 \begin{frame}[t]
     \frametitle{Score function estimator?}
-    \begin{align}
-        \Rightarrow\quad &\frac{\partial}{\partial \phi}\Biggl[\textcolor{OliveGreen}{\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\biggl[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \biggr]}\Biggr] \nonumber \\
+    \begin{align*}
+        \Rightarrow\quad &\frac{\partial}{\partial \phi}\Biggl[\textcolor{OliveGreen}{\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\biggl[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \biggr]}\Biggr] \\
         &= \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)} \Biggl[ \frac{\partial}{\partial \phi}\biggl[\log \Bigl(q(z_n \vert x_n, \phi)\Bigr)\biggr] \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{SFE} \label{eq:SFE}
-    \end{align}
+    \end{align*}
     \begin{itemize}
         \setlength{\itemsep}{1em}
         \item \emph{Can} MC and evaluate (\ref{eq:SFE}) with BP
@@ -289,10 +289,10 @@
             &\qquad + \textcolor{OliveGreen}{\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right]} \tag{ELBO}
         \end{align*}
         \item Recall encoder = diagonal Gaussian:
-        \begin{align}
-            (\mu, \sigma) &= \text{MLP}_\text{enc}(x_n, \phi) \tag{Encoder computation} \\
+        \begin{align*}
+            (\mu, \sigma) &= \text{MLP}_\text{enc}(x_n, \phi) \tag{Encoder forward} \\
             q(z_n \,\vert\, x_n, \phi) &= \mathcal{N}\Bigl( z_n \Bigm\vert \mu, \text{diag}(\sigma)^2 \Bigr) \tag{Encoder distribution}
-        \end{align}
+        \end{align*}
         \item ``Reparameterise'' $z_n$ as transform of auxiliary noise variable $\varepsilon$:
         \begin{align*}
             \varepsilon &\sim \mathcal{N}(\varepsilon \vert 0, I) \tag{Auxiliary noise sample} \\
@@ -321,6 +321,47 @@
 \end{frame}
 
 \begin{frame}
+    \frametitle{Evaluating reconstruction term}
+    \begin{align*}
+        & \textcolor{OliveGreen}{\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right]} \\
+        &\approx \frac{1}{L}\sum_{l=1}^L\left[ \log \biggl(p\Bigl(x_n \Bigm\vert \mu + \varepsilon^{(l)} \odot \sigma, \theta\Bigr)\biggr) \right] \tag{Reconstruction term}
+    \end{align*}
+    \begin{itemize}
+        \item We assumed (reparameterisation trick):
+        \begin{align*}
+            q(z_n \,\vert\, x_n, \phi) &= \mathcal{N}\Bigl( z_n \Bigm\vert \mu, \text{diag}(\sigma)^2 \Bigr) \tag{Encoder distribution}
+        \end{align*}
+        \item Freedom to choose $p(x_n\vert z_n,\theta)$
+        \item EG $x_n$ is continuous $\Rightarrow$ diagonal Gaussian:
+        \begin{align*}
+            \left(\mu^{(x)}, \sigma^{(x)}\right) &= \text{MLP}_\text{dec}(z_n, \theta) \tag{Decoder forward} \\
+            p(x_n \,\vert\, z_n, \theta) &= \mathcal{N}\left( x_n \;\middle\vert\; \mu^{(x)}, \text{diag}\left(\sigma^{(x)}\right)^2 \right) \tag{Decoder distribution}
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Evaluating reconstruction term}
+    \begin{align*}
+        p(x_n \,\vert\, z_n, \theta) &= \mathcal{N}\left( x_n \;\middle\vert\; \mu^{(x)}, \text{diag}\left(\sigma^{(x)}\right)^2 \right) \tag{Decoder distribution} \\
+        \Rightarrow\quad \log\Bigl( p(x_n \,\vert\, z_n, \theta) \Bigr) &= \log\left( \prod_i\left[ \frac{1}{\sqrt{2\pi}\sigma^{(x)}} \exp\left(-\frac{1}{2}\left(\frac{x_{ni}-\mu^{(x)}_i}{\sigma^{(x)}_i}\right)^2\right) \right] \right) \tag{Log density} \\
+        &= \frac{1}{2}\sum_i\left[ -\log(2\pi) - 2\log\left( \sigma^{(x)}_i \right) - \left(\frac{x_{ni}-\mu^{(x)}_i}{\sigma^{(x)}_i}\right)^2 \right] \tag{Expand logs}
+    \end{align*}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Evaluating reconstruction term}
+    \begin{itemize}
+        \item Large batch size $\Rightarrow$ can set $L=1$ \cite{kingma2013auto}
+    \end{itemize}
+    \begin{align*}
+        \Rightarrow\quad & \textcolor{OliveGreen}{\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right]} \\
+        &\approx \frac{1}{L}\sum_{l=1}^L\left[ \log \biggl(p\Bigl(x_n \Bigm\vert \mu + \varepsilon^{(l)} \odot \sigma, \theta\Bigr)\biggr) \right] \tag{General} \\
+        &= \frac{1}{2}\sum_i\left[ -\log(2\pi) - 2\log\left( \sigma^{(x)}_i \right) - \left(\frac{x_{ni}-\mu^{(x)}_i}{\sigma^{(x)}_i}\right)^2 \right] \tag{$\mathcal{N},L=1$}
+    \end{align*}
+\end{frame}
+
+\begin{frame}
     \frametitle{ELBO estimator}
     \begin{itemize}
         \item Now we have a differentiable + unbiased ELBO estimator \Smiley
@@ -330,9 +371,7 @@
         &\qquad + \textcolor{OliveGreen}{\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right]} \tag{ELBO} \\
         \\
         \widehat{\mathcal{L}}(x_n, \theta, \phi) &= \textcolor{blue}{\frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]} \\
-        &\qquad + \textcolor{OliveGreen}{\frac{1}{L}\sum_{l=1}^L\Biggl[ \log \biggl(p\Bigl(x_n \Bigm\vert \mu + \varepsilon^{(l)} \odot \sigma, \theta\Bigr)\biggr) \Biggr]} \tag{Estimator} \\
-        \\
-        \mathbb{E}\Bigl[ \widehat{\mathcal{L}}(x_n, \theta, \phi) \Bigr] &= \mathcal{L}(x_n, \theta, \phi) \tag{Unbiased}
+        &\qquad + \textcolor{OliveGreen}{\frac{1}{2}\sum_i\left[ -\log(2\pi) - 2\log\left( \sigma^{(x)}_i \right) - \left(\frac{x_{ni}-\mu^{(x)}_i}{\sigma^{(x)}_i}\right)^2 \right]} \tag{Estimator}
     \end{align*}
 \end{frame}
 
@@ -345,11 +384,12 @@
         \end{itemize}
     \end{itemize}
     \begin{align*}
-        (\mu, \sigma) &= \text{MLP}_\text{enc}(x_n, \phi) \tag{Encoder computation} \\
-        \varepsilon^{(l)} &\sim \mathcal{N}(\varepsilon^{(l)} \vert 0, I) \tag{Auxiliary noise samples} \\
-            z_n^{(l)} &= \mu + \varepsilon^{(l)} \odot \sigma \tag{Latent posterior samples} \\
+        (\mu, \sigma) &= \text{MLP}_\text{enc}(x_n, \phi) \tag{Encoder forward} \\
+        \varepsilon &\sim \mathcal{N}(\varepsilon \vert 0, I) \tag{Auxiliary noise sample} \\
+        z_n &= \mu + \varepsilon \odot \sigma \tag{Latent posterior sample} \\
+        \left(\mu^{(x)}, \sigma^{(x)}\right) &= \text{MLP}_\text{dec}(z_n, \theta) \tag{Decoder forward} \\
         \widehat{\mathcal{L}}(x_n, \theta, \phi) &= \textcolor{blue}{\frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]} \\
-        &\qquad + \textcolor{OliveGreen}{\frac{1}{L}\sum_{l=1}^L\Biggl[ \log \Bigl(\underbrace{p(x_n \vert z_n, \theta)}_{\text{MLP}_\text{dec}}\Bigr) \Biggr]} \tag{$\widehat{\text{ELBO}}$} \\
+        &\qquad + \textcolor{OliveGreen}{\frac{1}{2}\sum_i\left[ -\log(2\pi) - 2\log\left( \sigma^{(x)}_i \right) - \left(\frac{x_{ni}-\mu^{(x)}_i}{\sigma^{(x)}_i}\right)^2 \right]} \tag{$\widehat{\text{ELBO}}$} \\
         (\theta, \phi) &\leftarrow (\theta, \phi) - \frac{\partial}{\partial (\theta, \phi)} \left[\sum_n \Bigl[ -\widehat{\mathcal{L}}(x_n, \theta, \phi) \Bigr]\right] \tag{SGD}
     \end{align*}
 \end{frame}
@@ -358,12 +398,15 @@
     \frametitle{VAE sampling algorithm}
     \begin{align*}
         z&\sim \mathcal{N}(z\vert 0, I) \tag{Sample latent from prior} \\
-        \\
-        x&\sim \underbrace{p(x_n \vert z_n, \theta)}_{\text{MLP}_\text{dec}} \tag{Sample from decoder}
+        \left(\mu^{(x)}, \sigma^{(x)}\right) &= \text{MLP}_\text{dec}(z, \theta) \tag{Decoder forward} \\
+        \varepsilon &\sim \mathcal{N}(\varepsilon \vert 0, I) \tag{Auxiliary noise samples} \\
+        x &= \mu^{(x)} + \varepsilon \odot \sigma^{(x)} \tag{Reparameterise} \\
     \end{align*}
     \vfill
     \begin{itemize}
+        \setlength{\itemsep}{1em}
         \item NB don't use $q$ or $\phi$ during sampling
+        \item Simple, non-iterative, no extra HPs
     \end{itemize}
 \end{frame}
 
