@@ -88,17 +88,17 @@
 \begin{frame}[t]
     \frametitle{VAE problem setting}
     \begin{itemize}
-        \item Assume IID observed data $x_n$, latent variables $z_n$, and true parameters $\theta^*$, $n\in\{1,\dots,N\}$:
+        \setlength{\itemsep}{0.8em}
+        \item Observe data $\{x_1, \dots, x_N\}$
+        \item Assume $\{x_1, \dots, x_N\}\sim p(x | \theta^*)$
+        \item[$\bigstar$] Want to sample $\{x_{N+1}, \dots, x_{N+M}\}\sim p(x | \theta^*)$
+        \item Assume IID generative model with latent variables $z_n$:
         \begin{align*}
+            \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \tag{IID} \\
+            p(x_n \,\vert\, \theta) &= \sum_{z_n} \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \tag{Marginalise} \\
             p\bigl(x_n, z_n \,\vert\, \theta^*\bigr) &= p\bigl( z_n \,\vert\, \theta^* \bigr)\;p\bigl( x_n \,\vert\, z_n, \theta^* \bigr) \tag{Generative model}
         \end{align*}
         \item Sample $z_n$ $\rightarrow$ sample $x_n$ $\rightarrow$ observe $x_n$
-        \item We want:
-        \begin{align*}
-            \theta_\text{ML} &= \underset{\theta}{\text{argmax}}\left[ \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) \right] \tag{ML parameters} \\
-            \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \tag{IID data} \\
-            &= \sum_{n=1}^N \left[ \log\left( \sum_{z_n} \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \right) \right] \tag{Marginalise $z_n$}
-        \end{align*}
     \end{itemize}
 \end{frame}
 
