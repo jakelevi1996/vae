@@ -425,8 +425,15 @@
         \setlength{\itemsep}{2em}
         \item VAE implementation: \url{https://github.com/jakelevi1996/vae/blob/main/src/vae/models/vae.py}
         \item Results: \url{https://github.com/jakelevi1996/vae/}
-        \item NB large number of epochs!
-        \item $\sim$100 for VAE vs $\sim$3 for \emph{classification} (MNIST)
+        \item NB for MNIST:
+        \begin{itemize}
+            \vspace{1em}
+            \setlength{\itemsep}{1em}
+            \item Above demo = 100 epochs $\approx$ 30 minutes
+            \item \cite{kingma2013auto} train for $>$1000 epochs/33 hours !!!
+            \item Classification: 5 epochs $\Rightarrow$ $<$30 seconds $\Rightarrow$ $>$98\% test acc
+            \item CF discriminative VS generative
+        \end{itemize}
     \end{itemize}
 \end{frame}
 
