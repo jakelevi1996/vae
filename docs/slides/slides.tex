@@ -2,6 +2,7 @@
 
 \usepackage{setspace}
 \usepackage{tikzsymbols}
+\usepackage{breakcites}
 \usepackage[normalem]{ulem}
 
 \usetheme{Madrid}
@@ -422,9 +423,9 @@
 \begin{frame}
     \frametitle{VAE demo}
     \begin{itemize}
-        \setlength{\itemsep}{2em}
+        \setlength{\itemsep}{1.8em}
         \item VAE implementation: \url{https://github.com/jakelevi1996/vae/blob/main/src/vae/models/vae.py}
-        \item Results: \url{https://github.com/jakelevi1996/vae/}
+        \item Results: \url{https://github.com/jakelevi1996/vae/} (I know what you're thinking) \pause
         \item NB for MNIST:
         \begin{itemize}
             \vspace{1em}
@@ -432,9 +433,21 @@
             \item Above demo = 100 epochs $\approx$ 30 minutes
             \item \cite{kingma2013auto} train for $>$1000 epochs/33 hours !!!
             \item Classification: 5 epochs $\Rightarrow$ $<$30 seconds $\Rightarrow$ $>$98\% test acc
-            \item CF discriminative VS generative
+            \item CF discriminative VS generative in general?
         \end{itemize}
     \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{What's next?}
+    \begin{enumerate}
+        \setlength{\itemsep}{2em}
+        \item Conditional generation \cite{sohn2015learning}
+        \item Molecule generation \cite{gomez2018automatic}
+        \item Discrete latent variables \cite{jang2016categorical, maddison2016concrete, van2017neural}
+        \item Object-centric learning \cite{watters2019spatial, burgess2019monet, locatello2020object}
+        \item \dots
+    \end{enumerate}
 \end{frame}
 
 \begin{frame}
