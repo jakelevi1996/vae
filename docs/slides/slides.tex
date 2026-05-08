@@ -91,11 +91,11 @@
         \setlength{\itemsep}{0.8em}
         \item Observe data $\{x_1, \dots, x_N\}$
         \item Assume $\{x_1, \dots, x_N\}\sim p(x | \theta^*)$
-        \item[$\bigstar$] Want to sample $\{x_{N+1}, \dots, x_{N+M}\}\sim p(x | \theta^*)$
-        \item Assume IID generative model with latent variables $z_n$:
+        \item[$\bigstar$] Sample $\{x_{N+1}, \dots, x_{N+M}\}\sim p(x | \theta^*)$
+        \item Model:
         \begin{align*}
             \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \tag{IID} \\
-            p(x_n \,\vert\, \theta) &= \sum_{z_n} \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \tag{Marginalise} \\
+            p(x_n \,\vert\, \theta) &= \sum_{z_n} \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \tag{Latent variables} \\
             p\bigl(x_n, z_n \,\vert\, \theta^*\bigr) &= p\bigl( z_n \,\vert\, \theta^* \bigr)\;p\bigl( x_n \,\vert\, z_n, \theta^* \bigr) \tag{Generative model}
         \end{align*}
         \item Sample $z_n$ $\rightarrow$ sample $x_n$ $\rightarrow$ observe $x_n$
@@ -327,10 +327,6 @@
         &\approx \frac{1}{L}\sum_{l=1}^L\left[ \log \biggl(p\Bigl(x_n \Bigm\vert \mu + \varepsilon^{(l)} \odot \sigma, \theta\Bigr)\biggr) \right] \tag{Reconstruction term}
     \end{align*}
     \begin{itemize}
-        \item We assumed (reparameterisation trick):
-        \begin{align*}
-            q(z_n \,\vert\, x_n, \phi) &= \mathcal{N}\Bigl( z_n \Bigm\vert \mu, \text{diag}(\sigma)^2 \Bigr) \tag{Encoder distribution}
-        \end{align*}
         \item Freedom to choose $p(x_n\vert z_n,\theta)$
         \item EG $x_n$ is continuous $\Rightarrow$ diagonal Gaussian:
         \begin{align*}
@@ -343,8 +339,8 @@
 \begin{frame}
     \frametitle{Evaluating reconstruction term}
     \begin{align*}
-        p(x_n \,\vert\, z_n, \theta) &= \mathcal{N}\left( x_n \;\middle\vert\; \mu^{(x)}, \text{diag}\left(\sigma^{(x)}\right)^2 \right) \tag{Decoder distribution} \\
-        \Rightarrow\quad \log\Bigl( p(x_n \,\vert\, z_n, \theta) \Bigr) &= \log\left( \prod_i\left[ \frac{1}{\sqrt{2\pi}\sigma^{(x)}} \exp\left(-\frac{1}{2}\left(\frac{x_{ni}-\mu^{(x)}_i}{\sigma^{(x)}_i}\right)^2\right) \right] \right) \tag{Log density} \\
+        \log\Bigl( p(x_n \,\vert\, z_n, \theta) \Bigr) &= \log\Biggl(\mathcal{N}\left( x_n \;\middle\vert\; \mu^{(x)}, \text{diag}\left(\sigma^{(x)}\right)^2 \right) \tag{Decoder log likelihood}\Biggr) \\
+        &= \log\left( \prod_i\left[ \frac{1}{\sqrt{2\pi}\sigma^{(x)}_i} \exp\left(-\frac{1}{2}\left(\frac{x_{ni}-\mu^{(x)}_i}{\sigma^{(x)}_i}\right)^2\right) \right] \right) \tag{$\mathcal{N}$ definition} \\
         &= \frac{1}{2}\sum_i\left[ -\log(2\pi) - 2\log\left( \sigma^{(x)}_i \right) - \left(\frac{x_{ni}-\mu^{(x)}_i}{\sigma^{(x)}_i}\right)^2 \right] \tag{Expand logs}
     \end{align*}
 \end{frame}
@@ -356,8 +352,7 @@
     \end{itemize}
     \begin{align*}
         \Rightarrow\quad & \textcolor{OliveGreen}{\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right]} \\
-        &\approx \frac{1}{L}\sum_{l=1}^L\left[ \log \biggl(p\Bigl(x_n \Bigm\vert \mu + \varepsilon^{(l)} \odot \sigma, \theta\Bigr)\biggr) \right] \tag{General} \\
-        &= \frac{1}{2}\sum_i\left[ -\log(2\pi) - 2\log\left( \sigma^{(x)}_i \right) - \left(\frac{x_{ni}-\mu^{(x)}_i}{\sigma^{(x)}_i}\right)^2 \right] \tag{$\mathcal{N},L=1$}
+        &\approx \frac{1}{2}\sum_i\left[ -\log(2\pi) - 2\log\left( \sigma^{(x)}_i \right) - \left(\frac{x_{ni}-\mu^{(x)}_i}{\sigma^{(x)}_i}\right)^2 \right] \tag{$\mathcal{N},L=1$}
     \end{align*}
 \end{frame}
 
@@ -386,7 +381,7 @@
     \begin{align*}
         (\mu, \sigma) &= \text{MLP}_\text{enc}(x_n, \phi) \tag{Encoder forward} \\
         \varepsilon &\sim \mathcal{N}(\varepsilon \vert 0, I) \tag{Auxiliary noise sample} \\
-        z_n &= \mu + \varepsilon \odot \sigma \tag{Latent posterior sample} \\
+        z_n &= \mu + \varepsilon \odot \sigma \tag{Reparameterise} \\
         \left(\mu^{(x)}, \sigma^{(x)}\right) &= \text{MLP}_\text{dec}(z_n, \theta) \tag{Decoder forward} \\
         \widehat{\mathcal{L}}(x_n, \theta, \phi) &= \textcolor{blue}{\frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]} \\
         &\qquad + \textcolor{OliveGreen}{\frac{1}{2}\sum_i\left[ -\log(2\pi) - 2\log\left( \sigma^{(x)}_i \right) - \left(\frac{x_{ni}-\mu^{(x)}_i}{\sigma^{(x)}_i}\right)^2 \right]} \tag{$\widehat{\text{ELBO}}$}
@@ -421,6 +416,17 @@
         \setlength{\itemsep}{1em}
         \item NB don't use $q$ or $\phi$ during sampling
         \item Simple, non-iterative, no extra HPs
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{VAE demo}
+    \begin{itemize}
+        \setlength{\itemsep}{2em}
+        \item VAE implementation: \url{https://github.com/jakelevi1996/vae/blob/main/src/vae/models/vae.py}
+        \item Results: \url{https://github.com/jakelevi1996/vae/}
+        \item NB large number of epochs!
+        \item $\sim$100 for VAE vs $\sim$3 for \emph{classification} (MNIST)
     \end{itemize}
 \end{frame}
 
