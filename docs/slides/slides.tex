@@ -173,7 +173,7 @@
         &\le \log\Bigl(p(x_n \vert \theta)\Bigr) \tag{Log likelihood}
     \end{align*}
     \begin{itemize}
-        \item \$1mQ: How to estimate $\frac{\partial\mathcal{L}}{\partial\{\theta,\phi\}}$ using BP?
+        \item \$1mQ: How to estimate $\frac{\partial\mathcal{L}}{\partial(\theta,\phi)}$ using BP?
     \end{itemize}
 \end{frame}
 
@@ -436,15 +436,15 @@
     \begin{itemize}
         \setlength{\itemsep}{1.8em}
         \item VAE implementation: \url{https://github.com/jakelevi1996/vae/blob/main/src/vae/models/vae.py}
-        \item Results: \url{https://github.com/jakelevi1996/vae/} (I know what you're thinking) \pause
+        \item Results: \url{https://github.com/jakelevi1996/vae/\#results}
         \item NB for MNIST:
         \begin{itemize}
-            \vspace{1em}
+            \vspace{0.5em}
             \setlength{\itemsep}{1em}
-            \item Above demo = 100 epochs $\approx$ 30 minutes
+            \item Above demo = 100 epochs $\approx$ 30 minutes \pause
             \item \cite{kingma2013auto} train for $>$1000 epochs/33 hours !!!
             \item Classification: 5 epochs $\Rightarrow$ $<$30 seconds $\Rightarrow$ $>$98\% test acc
-            \item CF discriminative VS generative in general?
+            \item Discriminative VS generative?
         \end{itemize}
     \end{itemize}
 \end{frame}
@@ -453,12 +453,116 @@
     \frametitle{What's next?}
     \begin{enumerate}
         \setlength{\itemsep}{2em}
-        \item Conditional generation \cite{sohn2015learning}
+        \item Conditional generation \cite{kingma2014semi, sohn2015learning, yan2016attribute2image}
         \item Molecule generation \cite{gomez2018automatic}
         \item Discrete latent variables \cite{jang2016categorical, maddison2016concrete, van2017neural}
         \item Object-centric learning \cite{watters2019spatial, burgess2019monet, locatello2020object}
         \item \dots
     \end{enumerate}
+\end{frame}
+
+\begin{frame}
+    \frametitle{M2}
+    \centering
+    \includegraphics[height=0.9\textheight]{docs/slides/img/Screenshot from 2026-05-09 22-22-49.png}
+\end{frame}
+
+\begin{frame}
+    \frametitle{M2}
+    \begin{itemize}
+        \setlength{\itemsep}{1em}
+        \item \cite{kingma2014semi}
+        \item Semi-supervised learning:
+        \begin{itemize}
+            \item LARGE unlabelled dataset $\{x_i, \dots\}$
+            \item small labelled dataset $\{(x_j, y_j), \dots\}$
+            \item Train classifier
+            \item Outperform ignoring $\{x_i, \dots\}$
+        \end{itemize}
+        \item 2 models proposed:
+        \begin{itemize}
+            \item M1 = train VAE on $x$, train classifier on $y$ from $z$
+            \item M2: next slide
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{M2}
+    \begin{itemize}
+        \item Model:
+        \begin{align*}
+            p_\theta(x, y, z) &= p_\theta(x\vert y, z)\;p(y)\;p(z) \tag{Generative model} \\
+            q_\phi (z, y\vert x) &= q_\phi (z\vert x) \; q_\phi (y\vert x) \tag{Factorised posterior}
+        \end{align*}
+        \item Different loss functions for with/without labels:
+        \item With labels:
+        \begin{align*}
+            \log\Bigl( p(x, y) \Bigr) &\ge \mathbb{E}_{q_\phi(z\vert x)}\left[ \log\left(\frac{p(x, y, z)}{q_\phi(z\vert x)}\right) \right] \\
+            &= \mathbb{E}_{q_\phi(z\vert x)}\biggl[ \log\Bigl( p_\theta(x \vert y, z) \Bigr) + \log\Bigl( p(y) \Bigr) \\
+            &\qquad\qquad + \log\Bigl( p(z) \Bigr) - \log\Bigl( q_\phi(z\vert x) \Bigr) \biggr] \\
+            &= -\mathcal{L}(x, y)
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{M2}
+    \begin{itemize}
+        \item With label:
+        \begin{align*}
+            -\mathcal{L}(x, y) &= \mathbb{E}_{q_\phi(z\vert x)}\biggl[ \log\Bigl( p_\theta(x \vert y, z) \Bigr) + \log\Bigl( p(y) \Bigr) \\
+            &\qquad\qquad + \log\Bigl( p(z) \Bigr) - \log\Bigl( q_\phi(z\vert x) \Bigr) \biggr]
+        \end{align*}
+        \item Without label:
+        \begin{align*}
+            \log\Bigl( p(x) \Bigr) &\ge \mathbb{E}_{q_\phi(y, z\vert x)}\left[ \log\left(\frac{p(x, y, z)}{q_\phi(y, z\vert x)}\right) \right] \\
+            &= \mathbb{E}_{q_\phi(y\vert x)}\biggl[ \mathbb{E}_{q_\phi(z\vert x)}\biggl[ \log\Bigl( p_\theta(x \vert y, z) \Bigr) + \log\Bigl( p(y) \Bigr) \\
+            &\qquad\qquad + \log\Bigl( p(z) \Bigr) - \log\Bigl( q_\phi(z\vert x) \Bigr) - \log\Bigl( q_\phi(y\vert x) \Bigr) \biggr] \biggr] \\
+            &= \mathbb{E}_{q_\phi(y\vert x)} \Bigl[-\mathcal{L}(x, y)\Bigr] + \mathcal{H}\Bigl[ q_\phi(y\vert x) \Bigr]
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{M2}
+    \begin{itemize}
+        \item With label:
+        \begin{align*}
+            -\mathcal{L}(x, y) &= \mathbb{E}_{q_\phi(z\vert x)}\biggl[ \log\Bigl( p_\theta(x \vert y, z) \Bigr) + \log\Bigl( p(y) \Bigr) \\
+            &\qquad\qquad + \log\Bigl( p(z) \Bigr) - \log\Bigl( q_\phi(z\vert x) \Bigr) \biggr]
+        \end{align*}
+        \item Without label:
+        \begin{align*}
+            -\mathcal{U}(x) &= \mathbb{E}_{q_\phi(y\vert x)} \Bigl[-\mathcal{L}(x, y)\Bigr] + \mathcal{H}\Bigl[ q_\phi(y\vert x) \Bigr]
+        \end{align*}
+        \item Bound on ML for full dataset:
+        \begin{align*}
+            \mathcal{J} &= \sum_{(x, y)\sim\tilde{p}_l} \Bigl[ \mathcal{L}(x, y) \Bigr] + \sum_{x\sim\tilde{p}_u} \Bigl[ \mathcal{U}(x) \Bigr]
+        \end{align*}
+        \item Total loss: + term to train classifier $q_\phi(y\vert x)$ on $(x, y)\sim\tilde{p}_l$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{M2}
+    \begin{itemize}
+        \item Semi-supervised classification results:
+    \end{itemize}
+    \vfill
+    \centering
+    \includegraphics[width=\textwidth]{docs/slides/img/Screenshot from 2026-05-09 23-10-35.png}
+\end{frame}
+
+\begin{frame}
+    \frametitle{M2}
+    \frametitle{M2}
+    \begin{itemize}
+        \item Using $p_\theta(x \vert y, z)$, fixing $y/z$ respectively:
+    \end{itemize}
+    \vfill
+    \centering
+    \includegraphics[height=0.7\textheight]{docs/slides/img/Screenshot from 2026-05-09 23-11-31.png}
 \end{frame}
 
 \begin{frame}
