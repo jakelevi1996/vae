@@ -89,18 +89,20 @@
 \begin{frame}[t]
     \frametitle{VAE problem setting}
     \begin{itemize}
-        \setlength{\itemsep}{0.5em}
-        \item Observe data $x = \{x_1, \dots, x_N\}$, large $N$
+        \setlength{\itemsep}{0.8em}
+        \item Observe data $x = \{x_1, \dots, x_N\}$
         \item Assume $x \sim p(x \,|\, \theta^*)$
-        \item[$\bigstar$] Learn $\theta = \text{argmax}_\theta\Bigl[ \log\Bigl( p(x \,|\, \theta) \Bigr) \Bigr]$ (metric)
+        \item[$\bigstar$] Learn $\theta = \text{argmax}_\theta\Bigl[ \log\Bigl( p(x \,|\, \theta) \Bigr) \Bigr]$
         \item[$\bigstar$] Sample $\{x_{N+1}, \dots, x_{N+M}\}\sim p(x \,|\, \theta)$
         \item Model:
-        \begin{align*}
-            \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \tag{IID} \\
-            p(x_n \,\vert\, \theta) &= \int dz_n \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \tag{Latent variables} \\
-            p\bigl(x_n, z_n \,\vert\, \theta\bigr) &= p\bigl( z_n \,\vert\, \theta \bigr)\;p\bigl( x_n \,\vert\, z_n, \theta^* \bigr) \tag{Generative model}
-        \end{align*}
-        \item Sample $z_n$ $\rightarrow$ sample $x_n$ $\rightarrow$ observe $x_n$
+        \begin{itemize}
+            \vspace{0.8em}
+            \setlength{\itemsep}{0.8em}
+            \item $\{x_1, \dots, x_N\}$ IID
+            \item Sample $z_n \sim p\bigl( z_n \,\vert\, \theta \bigr)$
+            \item Sample $x_n \sim p\bigl( x_n \,\vert\, z_n, \theta \bigr)$
+            \item Observe $x_n$
+        \end{itemize}
     \end{itemize}
 \end{frame}
 
@@ -130,7 +132,7 @@
         \begin{itemize}
             \vspace{0.5em}
             \setlength{\itemsep}{0.5em}
-            \item Fix $p( z_n \,\vert\, \theta ) = \mathcal{N}(z_n \,|\, 0, I)$, $p\bigl( x_n \,\vert\, z_n, \theta \bigr) = \text{MLP}$
+            \item Fix $p( z_n \,\vert\, \theta ) = \mathcal{N}(z_n \,|\, 0, I)$ and $p\bigl( x_n \,\vert\, z_n, \theta \bigr) = \text{MLP}$
             \item MC with $z_n \sim p( z_n \,\vert\, \theta )$
         \end{itemize}
         \item But:
@@ -138,31 +140,9 @@
             \vspace{0.5em}
             \setlength{\itemsep}{0.5em}
             \item Not unbiased ($\mathbb{E}$ inside log)
-            \item p(sample close to true $z_n$) = tiny $\Rightarrow$ need many samples
+            \item p(sampled $z_n$ reconstructs $x_n$) = tiny $\Rightarrow$ need many samples
         \end{itemize}
-        \item Instead choose $q(z_n \vert x_n, \phi) \approx p(z_n \vert x_n, \theta)$, maximise ELBO
-    \end{itemize}
-\end{frame}
-
-\begin{frame}[t]
-    \frametitle{Recognition and generative models}
-    \begin{itemize}
-        \setlength{\itemsep}{1em}
-        \item Define $q$ and $\phi$:
-        \begin{align*}
-            q(z_n \vert x_n, \phi) \approx p(z_n \vert x_n, \theta) \tag{Approximate latent posterior}
-        \end{align*}
-        \item VAE has 2 neural networks:
-        \begin{itemize}
-            \item $q(z_n \vert x_n, \phi) =$ ``Encoder''/``Recognition'' model
-            \item $p(x_n \vert z_n, \theta) =$ ``Decoder''/``Generative'' model
-        \end{itemize}
-        \item Want to:
-        \begin{itemize}
-            \item Learn $\theta,\phi$ using BP to maximise $p(x\vert\theta)$
-            \item Use $\theta,\phi$ to sample \emph{new} data $\sim p(x\vert\theta^*)$
-        \end{itemize}
-        \item Strategy = maximise ELBO
+        \item Instead choose* some $q(z_n \vert x_n, \phi) \approx p(z_n \vert x_n, \theta)$, maximise \emph{ELBO}
     \end{itemize}
 \end{frame}
 
@@ -214,7 +194,74 @@
         &\le \log\Bigl(p(x_n \vert \theta)\Bigr) \tag{Log likelihood}
     \end{align*}
     \begin{itemize}
-        \item \$1mQ: How to estimate $\frac{\partial\mathcal{L}}{\partial(\theta,\phi)}$ using BP?
+        \item Regularise $\Rightarrow$ don't overfit latent for every $x_n$
+        \item Reconstruct $\Rightarrow$ learn realistic generative model
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{VAE challenges}
+    \$1mQs:
+    \begin{enumerate}
+        \setlength{\itemsep}{2em}
+        \vspace{2em}
+        \item How to define $q(z_n \vert x_n, \phi)$ ?
+        \item How to estimate $\frac{\partial\mathcal{L}}{\partial(\theta,\phi)}$ using BP?
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}[t]
+    \frametitle{Latent posterior}
+    \begin{itemize}
+        \setlength{\itemsep}{1em}
+        \item How to choose $q(z_n \vert x_n, \phi)$ ?
+        \item \emph{Could} learn some $q(z_n \vert x_n, \phi)$ separately for every $x_n$
+        \begin{itemize}
+            \setlength{\itemsep}{1em}
+            \vspace{1em}
+            \item $N$ large $\Rightarrow$ learn with batches
+            \item Store all $q(z_n \vert x_n, \phi)$ in memory? $\Rightarrow$ Memory $O(N)$ \Sadey
+            \item Learn $q(z_n \vert x_n, \phi)$ from scratch every iteration? Hard+wasteful \Sadey
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[t]
+    \frametitle{Latent posterior}
+    \begin{itemize}
+        \setlength{\itemsep}{1em}
+        \item How to choose $q(z_n \vert x_n, \phi)$ ?
+        \item \sout{\emph{Could} learn some $q(z_n \vert x_n, \phi)$ separately for every $x_n$}
+        \item ``Amortised inference'' \Smiley
+        \item EG:
+        \begin{align*}
+            (\mu, \sigma) &= \text{MLP}(x_n, \phi) \tag{MLP forward pass} \\
+            q(z_n \,\vert\, x_n, \phi) &= \mathcal{N}\Bigl( z_n \Bigm\vert \mu, \text{diag}(\sigma)^2 \Bigr) \tag{Latent posterior}
+        \end{align*}
+        \item Cost is ``amortised'' into $\phi$
+        \item Learn good $\phi\;\Rightarrow$ have $q(z_n \vert x_n, \phi)$ for \emph{all} $x_n$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Recognition and generative models}
+    \begin{itemize}
+        \setlength{\itemsep}{1em}
+        \item Define $q$ and $\phi$:
+        \begin{align*}
+            q(z_n \vert x_n, \phi) \approx p(z_n \vert x_n, \theta) \tag{Approximate latent posterior}
+        \end{align*}
+        \item VAE has 2 neural networks:
+        \begin{itemize}
+            \item $q(z_n \vert x_n, \phi) =$ ``Encoder''/``Recognition'' model
+            \item $p(x_n \vert z_n, \theta) =$ ``Decoder''/``Generative'' model
+        \end{itemize}
+        \item Want to:
+        \begin{itemize}
+            \item Learn $\theta,\phi$ using BP to maximise $p(x\vert\theta)$
+            \item Use $\theta,\phi$ to sample \emph{new} data $\sim p(x\vert\theta^*)$
+        \end{itemize}
+        \item Strategy = maximise ELBO
     \end{itemize}
 \end{frame}
 
