@@ -32,6 +32,8 @@ def main(
         util.Column("elbo",             ".5f"),
         util.Column("kl_term",          ".5f"),
         util.Column("reconstruct_term", ".5f"),
+        util.Column("sigma_z", ".5f"),
+        util.Column("sigma_x", ".5f"),
         print_interval=util.TimeInterval(1),
     )
 
@@ -42,6 +44,8 @@ def main(
             elbo=elbo,
             kl_term=kl_term,
             reconstruct_term=reconstruct_term,
+            sigma_z=model.log_sigma_z.mean().exp().item(),
+            sigma_x=model.log_sigma_x.mean().exp().item(),
         )
 
     x_data = dataset.sample(plot_samples)
@@ -49,7 +53,10 @@ def main(
 
     cp = plotting.ColourPicker.contrast()
 
-    output_dir = "results/train_vae_circle/%s" % args.get_summary()
+    output_dir = (
+        "results/train_vae_circle_shared_sigma/%s"
+        % args.get_summary()
+    )
 
     mp = plotting.MultiPlot(
         plotting.Subplot(
@@ -58,6 +65,14 @@ def main(
                 for c, s in zip(cp, "elbo kl_term reconstruct_term".split())
             ],
             plotting.Legend(),
+        ),
+        plotting.Subplot(
+            *[
+                plotting.Line(table.get_data(s), c=c, label=s)
+                for c, s in zip(cp, "sigma_z sigma_x".split())
+            ],
+            plotting.Legend(),
+            log_y=True,
         ),
         plotting.Subplot(
             plotting.Scatter(
@@ -78,7 +93,7 @@ def main(
             ),
             plotting.Legend(),
         ),
-        fs=[10, 4],
+        fs=[8, 8],
     )
     mp.save(dir_name=output_dir)
 
