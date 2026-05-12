@@ -89,14 +89,15 @@
 \begin{frame}[t]
     \frametitle{VAE problem setting}
     \begin{itemize}
-        \setlength{\itemsep}{0.8em}
-        \item Observe data $\{x_1, \dots, x_N\}$
-        \item Assume $\{x_1, \dots, x_N\}\sim p(x | \theta^*)$
-        \item[$\bigstar$] Sample $\{x_{N+1}, \dots, x_{N+M}\}\sim p(x | \theta^*)$
+        \setlength{\itemsep}{0.5em}
+        \item Observe data $x = \{x_1, \dots, x_N\}$
+        \item Assume $x \sim p(x \,|\, \theta^*)$
+        \item[$\bigstar$] Learn $\theta = \text{argmax}_\theta\Bigl[ \log\Bigl( p(x \,|\, \theta) \Bigr) \Bigr]$
+        \item[$\bigstar$] Sample $\{x_{N+1}, \dots, x_{N+M}\}\sim p(x \,|\, \theta)$
         \item Model:
         \begin{align*}
             \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \tag{IID} \\
-            p(x_n \,\vert\, \theta) &= \sum_{z_n} \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \tag{Latent variables} \\
+            p(x_n \,\vert\, \theta) &= \int dz_n \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \tag{Latent variables} \\
             p\bigl(x_n, z_n \,\vert\, \theta^*\bigr) &= p\bigl( z_n \,\vert\, \theta^* \bigr)\;p\bigl( x_n \,\vert\, z_n, \theta^* \bigr) \tag{Generative model}
         \end{align*}
         \item Sample $z_n$ $\rightarrow$ sample $x_n$ $\rightarrow$ observe $x_n$
@@ -131,9 +132,9 @@
         \item Expand log likelihood for each datapoint:
         \begin{align*}
             & \log\Bigl(p(x_n \vert \theta)\Bigr) \tag{Log likelihood} \\
-            &= \sum_{z_n} \left[ q(z_n \vert x_n, \phi) \log\Bigl(p(x_n \vert \theta)\Bigr) \right] \tag{Marginalise $q$} \\
-            &= \sum_{z_n} \left[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{p(z_n \vert x_n, \theta)} \right) \right] \tag{Product rule $z_n \vert x_n$} \\
-            &= \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \\
+            &= \int dz_n \left[ q(z_n \vert x_n, \phi) \log\Bigl(p(x_n \vert \theta)\Bigr) \right] \tag{Marginalise $q$} \\
+            &= \int dz_n \left[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{p(z_n \vert x_n, \theta)} \right) \right] \tag{Product rule $z_n \vert x_n$} \\
+            &= \int dz_n \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \\
             &\qquad\quad + q(z_n \vert x_n, \phi) \log\left( \frac{q(z_n \vert x_n, \phi)}{p(z_n \vert x_n, \theta)} \right) \biggr] \tag{$\times\frac{q}{q}$}
         \end{align*}
     \end{itemize}
@@ -142,19 +143,19 @@
 \begin{frame}[t]
     \frametitle{ELBO derivation}
     \begin{align*}
-        &= \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \\
+        &= \int dz_n \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \\
         &\qquad\quad + q(z_n \vert x_n, \phi) \log\left( \frac{q(z_n \vert x_n, \phi)}{p(z_n \vert x_n, \theta)} \right) \biggr] \tag{From previous slide} \\
-        &= \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \\
-        &\qquad\quad + \text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert x_n, \theta)\Bigr] \biggr] \tag{KL definition} \\
-        &\ge \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \biggr] \tag{KL $\ge 0$, ELBO v1}
+        &= \int dz_n \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \biggr] \\
+        &\qquad\quad + \text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert x_n, \theta)\Bigr] \tag{KL definition} \\
+        &\ge \int dz_n \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \biggr] \tag{KL $\ge 0$, ELBO v1}
     \end{align*}
 \end{frame}
 
 \begin{frame}
     \frametitle{ELBO derivation}
     \begin{align*}
-        &\ge \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \biggr] \tag{From previous slide} \\
-        &= \sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \\
+        &\ge \int dz_n \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(x_n, z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \biggr] \tag{From previous slide} \\
+        &= \int dz_n \biggl[ q(z_n \vert x_n, \phi) \log\left( \frac{p(z_n \vert \theta)}{q(z_n \vert x_n, \phi)} \right) \\
         &\qquad\quad + q(z_n \vert x_n, \phi) \log \Bigl( p(x_n \vert z_n, \theta) \Bigr) \biggr] \tag{Product rule* $x_n\vert z_n$} \\
         &= -\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr] \\
         &\qquad + \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right] \tag{KL and $\mathbb{E}$ definitions} \\
@@ -248,8 +249,8 @@
         \item \emph{Can} differentiate using SFE:
         \begin{align*}
             &\frac{\partial}{\partial \phi}\Biggl[\textcolor{OliveGreen}{\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\biggl[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \biggr]}\Biggr] \\
-            &= \frac{\partial}{\partial \phi}\Biggl[\sum_{z_n} \biggl[ q(z_n \vert x_n, \phi) \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \biggr]\Biggr] \tag{$\mathbb{E}=\sum q$} \\
-            &= \sum_{z_n} \Biggl[ \frac{\partial}{\partial \phi}\Bigl[q(z_n \vert x_n, \phi)\Bigr] \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{Swap $\partial$ and $\Sigma$}
+            &= \frac{\partial}{\partial \phi}\Biggl[\int dz_n \biggl[ q(z_n \vert x_n, \phi) \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \biggr]\Biggr] \tag{$\mathbb{E}=\int q$} \\
+            &= \int dz_n \Biggl[ \frac{\partial}{\partial \phi}\Bigl[q(z_n \vert x_n, \phi)\Bigr] \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{Swap $\partial$ and $\int$}
         \end{align*}
     \end{itemize}
 \end{frame}
@@ -257,10 +258,10 @@
 \begin{frame}[t]
     \frametitle{Score function estimator?}
     \begin{align*}
-        &= \sum_{z_n} \Biggl[ \frac{\partial}{\partial \phi}\Bigl[q(z_n \vert x_n, \phi)\Bigr] \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{From previous slide} \\
-        &= \sum_{z_n} \Biggl[ q(z_n \vert x_n, \phi) \frac{\frac{\partial}{\partial \phi}\Bigl[q(z_n \vert x_n, \phi)\Bigr]}{q(z_n \vert x_n, \phi)} \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{$\times\frac{q}{q}$} \\
-        &= \sum_{z_n} \Biggl[ q(z_n \vert x_n, \phi) \frac{\partial}{\partial \phi}\biggl[\log \Bigl(q(z_n \vert x_n, \phi)\Bigr)\biggr] \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{$\frac{\nabla[q]}{q}=\nabla\bigl[\log(q)\bigr]$} \\
-        &= \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)} \Biggl[ \frac{\partial}{\partial \phi}\biggl[\log \Bigl(q(z_n \vert x_n, \phi)\Bigr)\biggr] \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{$\sum q=\mathbb{E}$} \\
+        &= \int dz_n \Biggl[ \frac{\partial}{\partial \phi}\Bigl[q(z_n \vert x_n, \phi)\Bigr] \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{From previous slide} \\
+        &= \int dz_n \Biggl[ q(z_n \vert x_n, \phi) \frac{\frac{\partial}{\partial \phi}\Bigl[q(z_n \vert x_n, \phi)\Bigr]}{q(z_n \vert x_n, \phi)} \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{$\times\frac{q}{q}$} \\
+        &= \int dz_n \Biggl[ q(z_n \vert x_n, \phi) \frac{\partial}{\partial \phi}\biggl[\log \Bigl(q(z_n \vert x_n, \phi)\Bigr)\biggr] \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{$\frac{\nabla[q]}{q}=\nabla\bigl[\log(q)\bigr]$} \\
+        &= \mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)} \Biggl[ \frac{\partial}{\partial \phi}\biggl[\log \Bigl(q(z_n \vert x_n, \phi)\Bigr)\biggr] \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \Biggr] \tag{$\int q=\mathbb{E}$} \\
     \end{align*}
 \end{frame}
 
