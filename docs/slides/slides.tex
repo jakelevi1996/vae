@@ -474,15 +474,16 @@
         \item \cite{kingma2014semi}
         \item Semi-supervised learning:
         \begin{itemize}
-            \item LARGE unlabelled dataset $\{x_i, \dots\}$
-            \item small labelled dataset $\{(x_j, y_j), \dots\}$
+            \item LARGE unlabelled dataset $\{x_i, \dots\}\sim\tilde{p}_u$
+            \item small labelled dataset $\{(x_j, y_j), \dots\}\sim\tilde{p}_l$
             \item Train classifier
             \item Outperform ignoring $\{x_i, \dots\}$
         \end{itemize}
-        \item 2 models proposed:
+        \item 3 models proposed:
         \begin{itemize}
             \item M1 = train VAE on $x$, train classifier on $y$ from $z$
-            \item M2: next slide
+            \item M2 (next slide)
+            \item M1+M2 = use $z$ from M1 as $x$ for M2
         \end{itemize}
     \end{itemize}
 \end{frame}
