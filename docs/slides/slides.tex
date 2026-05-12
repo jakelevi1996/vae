@@ -41,6 +41,12 @@
 \frame{\titlepage}
 
 \begin{frame}
+    \frametitle{VAE}
+    \centering
+    \includegraphics[height=0.9\textheight]{docs/slides/img/Screenshot from 2026-05-12 21-16-28.png}
+\end{frame}
+
+\begin{frame}
     \frametitle{Historical context}
     \begin{itemize}
         \setlength{\itemsep}{2em}
@@ -48,7 +54,7 @@
         \item Similar \cite{rezende2014stochastic} published 27 days later
         \item 55k vs 7k citations \pause
         \item Lesson 1: don't get scooped \pause
-        \item Adam, ResNets, BatchNorm/LayerNorm, etc don't yet exist
+        \item 2013: Adam, ResNets, BatchNorm/LayerNorm, etc don't yet exist
         \item VAEs relative to 2010s DL research:
     \end{itemize}
 \end{frame}
@@ -101,7 +107,7 @@
             \item $\{x_1, \dots, x_N\}$ IID
             \item Sample $z_n \sim p\bigl( z_n \,\vert\, \theta \bigr)$
             \item Sample $x_n \sim p\bigl( x_n \,\vert\, z_n, \theta \bigr)$
-            \item Observe $x_n$
+            \item Observe $x_n$ ($z_n$ hidden)
         \end{itemize}
     \end{itemize}
 \end{frame}
@@ -112,9 +118,10 @@
         \setlength{\itemsep}{0.5em}
         \item \emph{How} to learn $\theta = \text{argmax}_\theta\Bigl[ \log\Bigl( p(x \,|\, \theta) \Bigr) \Bigr]$ ?
         \begin{align*}
-            \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \tag{IID} \\
+            & \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) \tag{Log likelihood} \\
+            &= \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \tag{IID} \\
             &= \sum_{n=1}^N \left[ \log\left( \int dz_n \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \right) \right] \tag{Marginalise $z_n$} \\
-            &= \sum_{n=1}^N \left[ \log\left( \int dz_n \Bigl[ p\bigl( z_n \,\vert\, \theta \bigr)\;p\bigl( x_n \,\vert\, z_n, \theta \bigr) \Bigr] \right) \right] \tag{Generative model} \\
+            &= \sum_{n=1}^N \left[ \log\left( \int dz_n \Bigl[ p\bigl( z_n \,\vert\, \theta \bigr)\;p\bigl( x_n \,\vert\, z_n, \theta \bigr) \Bigr] \right) \right] \tag{Product rule $x_n | z_n$} \\
             &= \sum_{n=1}^N \left[ \log\left( \mathbb{E}_{p( z_n \,\vert\, \theta )} \Bigl[ p\bigl( x_n \,\vert\, z_n, \theta \bigr) \Bigr] \right) \right] \tag{$\int p = \mathbb{E}$}
         \end{align*}
     \end{itemize}
@@ -210,6 +217,17 @@
     \end{enumerate}
 \end{frame}
 
+\begin{frame}
+    \frametitle{VAE challenges}
+    \$1mQs:
+    \begin{enumerate}
+        \setlength{\itemsep}{2em}
+        \vspace{2em}
+        \item How to define $q(z_n \vert x_n, \phi)$ ?
+        \item \textcolor{black!30}{How to estimate $\frac{\partial\mathcal{L}}{\partial(\theta,\phi)}$ using BP?}
+    \end{enumerate}
+\end{frame}
+
 \begin{frame}[t]
     \frametitle{Latent posterior}
     \begin{itemize}
@@ -238,31 +256,49 @@
             (\mu, \sigma) &= \text{MLP}(x_n, \phi) \tag{MLP forward pass} \\
             q(z_n \,\vert\, x_n, \phi) &= \mathcal{N}\Bigl( z_n \Bigm\vert \mu, \text{diag}(\sigma)^2 \Bigr) \tag{Latent posterior}
         \end{align*}
-        \item Cost is ``amortised'' into $\phi$
-        \item Learn good $\phi\;\Rightarrow$ have $q(z_n \vert x_n, \phi)$ for \emph{all} $x_n$
+        \item Cost ``amortised'' into $\phi$
+        \item Learn good $\phi\;\Rightarrow$ have $q(z_n \vert x_n, \phi)$ for \emph{all} $x_n$ from MLP
     \end{itemize}
 \end{frame}
 
 \begin{frame}
     \frametitle{Recognition and generative models}
     \begin{itemize}
-        \setlength{\itemsep}{1em}
-        \item Define $q$ and $\phi$:
+        \setlength{\itemsep}{0.5em}
+        \item Recall ELBO:
         \begin{align*}
-            q(z_n \vert x_n, \phi) \approx p(z_n \vert x_n, \theta) \tag{Approximate latent posterior}
+            \mathcal{L}(x_n, \theta, \phi) &= \textcolor{blue}{{-\text{KL}\Bigl[q(z_n \vert x_n, \phi) \Bigm\Vert p(z_n \vert \theta)\Bigr]}} \\
+            &\qquad + \textcolor{OliveGreen}{\mathbb{E}_{z_n\sim q(z_n \vert x_n, \phi)}\left[ \log \Bigl(p(x_n \vert z_n, \theta)\Bigr) \right]} \tag{ELBO}
         \end{align*}
-        \item VAE has 2 neural networks:
+        \item 3 distributions: $p(z_n \vert \theta)$, $q(z_n \vert x_n, \phi)$, $p(x_n \vert z_n, \theta)$
+        \item VAE:
         \begin{itemize}
+            \setlength{\itemsep}{0.5em}
+            \vspace{0.5em}
+            \item $p(z_n \vert \theta)$ fixed, EG $\mathcal{N}(z_n | 0, I)$
             \item $q(z_n \vert x_n, \phi) =$ ``Encoder''/``Recognition'' model
             \item $p(x_n \vert z_n, \theta) =$ ``Decoder''/``Generative'' model
+            \item Encoder, decoder = neural networks
         \end{itemize}
-        \item Want to:
-        \begin{itemize}
-            \item Learn $\theta,\phi$ using BP to maximise $p(x\vert\theta)$
-            \item Use $\theta,\phi$ to sample \emph{new} data $\sim p(x\vert\theta^*)$
-        \end{itemize}
-        \item Strategy = maximise ELBO
+        \item NB recognition/generative terminology $\sim$ 18yo \cite{hinton1995wake}
     \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{VAE challenges}
+    \$1mQs:
+    \begin{enumerate}
+        \setlength{\itemsep}{2em}
+        \vspace{2em}
+        \item \sout{How to define $q(z_n \vert x_n, \phi)$ ?}
+        \item How to estimate $\frac{\partial\mathcal{L}}{\partial(\theta,\phi)}$ using BP?
+        \begin{enumerate}
+            \setlength{\itemsep}{2em}
+            \vspace{2em}
+            \item KL term
+            \item Reconstruction term
+        \end{enumerate}
+    \end{enumerate}
 \end{frame}
 
 \begin{frame}[t]
@@ -323,6 +359,23 @@
             &= \textcolor{blue}{-\frac{1}{2}\sum_i \Bigl[ 1 + 2\log(\sigma_i) - \mu_j^2 - \sigma_j^2 \Bigr]} \tag{\textcolor{blue}{Closed-form KL \Smiley}}
         \end{align*}
     \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{VAE challenges}
+    \$1mQs:
+    \begin{enumerate}
+        \setlength{\itemsep}{2em}
+        \vspace{2em}
+        \item \sout{How to define $q(z_n \vert x_n, \phi)$ ?}
+        \item How to estimate $\frac{\partial\mathcal{L}}{\partial(\theta,\phi)}$ using BP?
+        \begin{enumerate}
+            \setlength{\itemsep}{2em}
+            \vspace{2em}
+            \item \sout{KL term}
+            \item Reconstruction term
+        \end{enumerate}
+    \end{enumerate}
 \end{frame}
 
 \begin{frame}[t]
