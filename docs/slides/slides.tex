@@ -3,6 +3,7 @@
 \usepackage{setspace}
 \usepackage{tikzsymbols}
 \usepackage{breakcites}
+\usepackage{subcaption}
 \usepackage[normalem]{ulem}
 
 \usetheme{Madrid}
@@ -570,6 +571,37 @@
     \frametitle{Results \cite{kingma2013auto}}
     \centering
     \includegraphics[height=0.8\textheight]{docs/slides/img/Screenshot from 2026-05-09 11-24-54.png}
+\end{frame}
+
+\begin{frame}
+    \frametitle{VAE demo results}
+    \begin{itemize}
+        \item VAE implementation: \url{https://github.com/jakelevi1996/vae/blob/main/src/vae/models/vae.py}
+    \end{itemize}
+    \begin{figure}
+        \hfill
+        \begin{subfigure}{0.3\textwidth}
+            \includegraphics[width=\textwidth]{results/Shifted_Circle_dataset.png}
+            \caption{Dataset}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}{0.45\textwidth}
+            \includegraphics[width=\textwidth]{results/train_vae_circle/output.png}
+            \caption{Seed = 0}
+        \end{subfigure}
+        \hfill
+        \newline
+        \vfill
+        \begin{subfigure}{0.45\textwidth}
+            \includegraphics[width=\textwidth]{results/train_vae_circle/s1/output.png}
+            \caption{Seed = 1}
+        \end{subfigure}
+        \hfill
+        \begin{subfigure}{0.45\textwidth}
+            \includegraphics[width=\textwidth]{results/train_vae_circle/s2/output.png}
+            \caption{Seed = 2}
+        \end{subfigure}
+    \end{figure}
 \end{frame}
 
 \begin{frame}
