@@ -90,17 +90,57 @@
     \frametitle{VAE problem setting}
     \begin{itemize}
         \setlength{\itemsep}{0.5em}
-        \item Observe data $x = \{x_1, \dots, x_N\}$
+        \item Observe data $x = \{x_1, \dots, x_N\}$, large $N$
         \item Assume $x \sim p(x \,|\, \theta^*)$
-        \item[$\bigstar$] Learn $\theta = \text{argmax}_\theta\Bigl[ \log\Bigl( p(x \,|\, \theta) \Bigr) \Bigr]$
+        \item[$\bigstar$] Learn $\theta = \text{argmax}_\theta\Bigl[ \log\Bigl( p(x \,|\, \theta) \Bigr) \Bigr]$ (metric)
         \item[$\bigstar$] Sample $\{x_{N+1}, \dots, x_{N+M}\}\sim p(x \,|\, \theta)$
         \item Model:
         \begin{align*}
             \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \tag{IID} \\
             p(x_n \,\vert\, \theta) &= \int dz_n \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \tag{Latent variables} \\
-            p\bigl(x_n, z_n \,\vert\, \theta^*\bigr) &= p\bigl( z_n \,\vert\, \theta^* \bigr)\;p\bigl( x_n \,\vert\, z_n, \theta^* \bigr) \tag{Generative model}
+            p\bigl(x_n, z_n \,\vert\, \theta\bigr) &= p\bigl( z_n \,\vert\, \theta \bigr)\;p\bigl( x_n \,\vert\, z_n, \theta^* \bigr) \tag{Generative model}
         \end{align*}
         \item Sample $z_n$ $\rightarrow$ sample $x_n$ $\rightarrow$ observe $x_n$
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[t]
+    \frametitle{VAE objective}
+    \begin{itemize}
+        \setlength{\itemsep}{0.5em}
+        \item \emph{How} to learn $\theta = \text{argmax}_\theta\Bigl[ \log\Bigl( p(x \,|\, \theta) \Bigr) \Bigr]$ ?
+        \begin{align*}
+            \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \left[ \log\Bigl( p\bigl(x_n \,\vert\, \theta\bigr) \Bigr) \right] \tag{IID} \\
+            &= \sum_{n=1}^N \left[ \log\left( \int dz_n \Bigl[ p\bigl(x_n, z_n \,\vert\, \theta\bigr) \Bigr] \right) \right] \tag{Marginalise $z_n$} \\
+            &= \sum_{n=1}^N \left[ \log\left( \int dz_n \Bigl[ p\bigl( z_n \,\vert\, \theta \bigr)\;p\bigl( x_n \,\vert\, z_n, \theta \bigr) \Bigr] \right) \right] \tag{Generative model} \\
+            &= \sum_{n=1}^N \left[ \log\left( \mathbb{E}_{p( z_n \,\vert\, \theta )} \Bigl[ p\bigl( x_n \,\vert\, z_n, \theta \bigr) \Bigr] \right) \right] \tag{$\int p = \mathbb{E}$}
+        \end{align*}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[t]
+    \frametitle{VAE objective}
+    \begin{itemize}
+        \setlength{\itemsep}{0.5em}
+        \item \emph{How} to learn $\theta = \text{argmax}_\theta\Bigl[ \log\Bigl( p(x \,|\, \theta) \Bigr) \Bigr]$ ?
+        \begin{align*}
+            \log\Bigl( p\bigl(x \,\vert\, \theta\bigr) \Bigr) &= \sum_{n=1}^N \left[ \log\left( \mathbb{E}_{p( z_n \,\vert\, \theta )} \Bigl[ p\bigl( x_n \,\vert\, z_n, \theta \bigr) \Bigr] \right) \right] \tag{Previous slide}
+        \end{align*}
+        \item Could:
+        \begin{itemize}
+            \vspace{0.5em}
+            \setlength{\itemsep}{0.5em}
+            \item Fix $p( z_n \,\vert\, \theta ) = \mathcal{N}(z_n \,|\, 0, I)$, $p\bigl( x_n \,\vert\, z_n, \theta \bigr) = \text{MLP}$
+            \item MC with $z_n \sim p( z_n \,\vert\, \theta )$
+        \end{itemize}
+        \item But:
+        \begin{itemize}
+            \vspace{0.5em}
+            \setlength{\itemsep}{0.5em}
+            \item Not unbiased ($\mathbb{E}$ inside log)
+            \item p(sample close to true $z_n$) = tiny $\Rightarrow$ need many samples
+        \end{itemize}
+        \item Instead choose $q(z_n \vert x_n, \phi) \approx p(z_n \vert x_n, \theta)$, maximise ELBO
     \end{itemize}
 \end{frame}
 
