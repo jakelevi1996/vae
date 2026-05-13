@@ -584,7 +584,7 @@
             \setlength{\itemsep}{0.5em}
             \vspace{0.5em}
             \item Define model(s) + $\mathcal{L}$
-            \item $\partial/\partial x$ (BP)
+            \item $\partial\mathcal{L}/\partial x$ (BP)
             \item SGD
         \end{itemize}
     \end{itemize}
@@ -819,7 +819,7 @@
         \item Train $f_\text{enc}(x_\text{SMILES}) = z_n$
         \item Train $f_\text{dec}(z_n) = x_\text{SMILES}$
         \item $f_\text{enc}, f_\text{dec}$ = CNNs or RNNs
-        \item Train $f_\text{prop}(z_n) = \pi$, $f_\text{prop}$ = MLP or GP, $\pi = \dots$
+        \item Train property prediction $f_\text{prop}(z_n) = \pi$, $f_\text{prop}$ = MLP or GP, $\pi = \dots$
         \begin{itemize}
             \item ``logP'' = water-octanol partition coefficient
             \item ``SAS'' = synthetic accessibility score
@@ -828,7 +828,7 @@
         \end{itemize}
         \item To sample molecules with properties $\pi^*$:
         \begin{itemize}
-            \item $z_n = \text{argmin}_{z_n}\Bigl[ \mathcal{L}\Bigl(f_\text{prop}(z_n), \pi^*\Bigr) \Bigr]$ (EG SGD, BP through $f_\text{prop}$)
+            \item $z_n = \text{argmin}_{z_n}\Bigl[ \mathcal{L}\Bigl(f_\text{prop}(z_n), \pi^*\Bigr) \Bigr]$ (EG BP through $f_\text{prop}$ + SGD)
             \item $f_\text{dec}(z_n) = x_\text{SMILES}$
         \end{itemize}
     \end{itemize}
