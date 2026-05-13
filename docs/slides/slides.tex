@@ -840,6 +840,19 @@
 \end{frame}
 
 \begin{frame}
+    \frametitle{VAE molecule generation developments}
+    \begin{itemize}
+        \setlength{\itemsep}{1em}
+        \item \sout{SMILES} Encode/decode molecular graphs directly \cite{jin2018junction}
+        \item \emph{Constrained} BO $\Rightarrow$ avoid generating invalid molecules \cite{griffiths2020constrained}
+        \item ``Deep metric learning'' EG $\mathcal{L}_\text{triplet}(x^b, x^+, x^-)$ $\Rightarrow$ improve VAE latent space structure $\Rightarrow$ improve BO performance \cite{grosnit2021high}
+        \item Adapt trust regions to account for input space structure \cite{maus2022local}
+        \item Using ``pretrained ProtT5nv transformer-based T5 encoder and decode'' in the VAE pipeline \cite{sevgen2025prot}
+        \item \dots
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
     \frametitle{Frame title 1}
     \begin{itemize}
         \item Blah blah blah
