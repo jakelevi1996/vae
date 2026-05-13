@@ -786,6 +786,60 @@
 \end{frame}
 
 \begin{frame}
+    \frametitle{\cite{gomez2018automatic}}
+    \centering
+    \includegraphics[height=0.8\textheight]{docs/slides/img/Auto chem design paper.png}
+\end{frame}
+
+\begin{frame}
+    \frametitle{\cite{gomez2018automatic}}
+    \begin{columns}
+        \begin{column}{0.45\textwidth}
+            \begin{itemize}
+                \setlength{\itemsep}{2em}
+                \item[$\bigstar$] Generate new molecules with desirable properties
+                \item Train VAE on SMILES strings
+                \item SMILES = ``Simplified Molecular Input Line Entry System''
+                \item Chemical structure $\rightarrow$ ASCII string
+            \end{itemize}
+        \end{column}
+        \hfill
+        \begin{column}{0.45\textwidth}
+            \centering
+            \includegraphics[height=0.8\textheight]{docs/slides/img/SMILES.png}
+            \tiny \url{https://en.wikipedia.org/wiki/Simplified_Molecular_Input_Line_Entry_System}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}
+    \frametitle{\cite{gomez2018automatic}}
+    \begin{itemize}
+        \setlength{\itemsep}{0.8em}
+        \item Train $f_\text{enc}(x_\text{SMILES}) = z_n$
+        \item Train $f_\text{dec}(z_n) = x_\text{SMILES}$
+        \item $f_\text{enc}, f_\text{dec}$ = CNNs or RNNs
+        \item Train $f_\text{prop}(z_n) = \pi$, $f_\text{prop}$ = MLP or GP, $\pi = \dots$
+        \begin{itemize}
+            \item ``logP'' = water-octanol partition coefficient
+            \item ``SAS'' = synthetic accessibility score
+            \item ``QED'' = Quantitative Estimation of Drug-likeness
+            \item \dots
+        \end{itemize}
+        \item To sample molecules with properties $\pi^*$:
+        \begin{itemize}
+            \item $z_n = \text{argmin}_{z_n}\Bigl[ \mathcal{L}\Bigl(f_\text{prop}(z_n), \pi^*\Bigr) \Bigr]$ (EG SGD, BP through $f_\text{prop}$)
+            \item $f_\text{dec}(z_n) = x_\text{SMILES}$
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{\cite{gomez2018automatic}}
+    \includegraphics[width=\textwidth]{docs/slides/img/VAE GP molecule samples.png}
+\end{frame}
+
+\begin{frame}
     \frametitle{Frame title 1}
     \begin{itemize}
         \item Blah blah blah
